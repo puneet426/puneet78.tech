@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 💻 MOVE CORE BODY COLOR AND GLOBAL TRANSITION LOGIC TO BASE LAYER */
+@layer base {
+  body {
+    @apply bg-[#fdfbf7] dark:bg-[#0a0a0a] text-neutral-900 dark:text-neutral-100;
+  }
+
+  /* 🌓 SMOOTH THEME SWITCHING: Ensures everything morphs softly instead of snapping */
+  *, ::before, ::after {
+    @apply transition-colors duration-300 ease-in-out border-neutral-200 dark:border-neutral-800/60;
+  }
+}
+
+::selection {
+  background-color: #7c6cf6;
+  color: #09090b;
+}
+
+:focus-visible {
+  outline: 2px solid #7c6cf6;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* 💻 CUSTOM THEME-ADAPTIVE SCROLLBARS */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-[#fdfbf7] dark:bg-[#0a0a0a];
+  transition: background-color 0.3s ease;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-neutral-200 dark:bg-[#232328];
+  border-radius: 999px;
+  transition: background-color 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-neutral-300 dark:bg-[#2d2d34];
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(245, 245, 246, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 245, 246, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+@layer utilities {
+  @keyframes icon-pulse {
+    0%, 100% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    15%, 85% {
+      opacity: 0.45;
+      transform: scale(1);
+    }
+  }
+
+  .animate-icon-pulse {
+    will-change: opacity, transform;
+    animation: 4s ease-in-out infinite icon-pulse;
+  }
+}

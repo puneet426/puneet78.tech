@@ -1,37 +1,73 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useRef, useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { submitContactForm } from "./actions";
 
 export default function ContactPage() {
-  const [isPending, setIsPending] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<{ success: boolean; error: string | null }>({
     success: false,
     error: null,
   });
-  const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsPending(true);
     setState({ success: false, error: null });
 
     const formData = new FormData(e.currentTarget);
-    
-    try {
-      const result = await submitContactForm(null, formData);
-      if (result.success) {
-        setState({ success: true, error: null });
-        formRef.current?.reset();
-      } else {
-        setState({ success: false, error: result.error });
-      }
-    } catch (err) {
-      setState({ success: false, error: "Something went wrong. Please try again." });
-    } finally {
-      setIsPending(false);
+    const name = formData.get("name")?.toString().trim();
+    const email = formData.get("email")?.toString().trim();
+    const subject = formData.get("subject")?.toString().trim();
+    const message = formData.get("message")?.toString().trim();
+
+    if (!name || !email || !message) {
+      setState({ success: false, error: "Please fill all required fields." });
+      return;
     }
+
+    // 🚀 Execute submission safely within transition boundaries from the client browser
+    startTransition(async () => {
+      try {
+        // Securely read key configuration matching your Next.js local setup
+        const formAccessKey = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
+
+        if (!formAccessKey) {
+          setState({ success: false, error: "Configuration Error: Access key is missing." });
+          return;
+        }
+
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            access_key: formAccessKey,
+            name,
+            email,
+            subject: subject || `New Portfolio Query from ${name}`,
+            message,
+            from_name: "Portfolio Contact Form",
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          setState({ success: true, error: null });
+          formRef.current?.reset();
+        } else {
+          setState({ success: false, error: data.message || "Form submission failed." });
+        }
+      } catch (err) {
+        setState({ 
+          success: false, 
+          error: "Network validation failed. Please check your internet connection or try again." 
+        });
+      }
+    });
   };
 
   return (
@@ -57,6 +93,7 @@ export default function ContactPage() {
               <p className="text-emerald-600 dark:text-emerald-400 font-bold text-sm uppercase tracking-wider">✔ Message Sent Successfully!</p>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">Thank you for reaching out. I will get back to you shortly.</p>
               <button 
+                type="button"
                 onClick={() => setState({ success: false, error: null })}
                 className="mt-4 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
               >
@@ -128,8 +165,6 @@ export default function ContactPage() {
 
               {/* Form Action Controls Row */}
               <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-2">
-                
-                {/* Fallback Validation Context Error String Text Node */}
                 <div className="text-xs font-medium text-neutral-400 dark:text-neutral-500 sm:text-left text-center">
                   {state.error ? (
                     <span className="text-rose-500 dark:text-rose-400 font-semibold">{state.error}</span>

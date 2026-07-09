@@ -58,7 +58,7 @@ export const PROJECTS_DATA: Project[] = [
       { name: "Framer Motion", icon: "/technology/framer-motion.svg" }
     ],
     extraTechCount: 1,
-    liveUrl: "https://www..com/",
+    liveUrl: "https://puneet.occazi.in/",
     caseStudy: {
       problemText: "Most portfolio templates are interchangeable — same layout, same card grid, no personality. I wanted something that actually represents how I think and work, not just a list of links.",
       approachText: "Built from scratch with Next.js App Router, prioritizing motion, theme depth, and real content. Added a 3D banner system, GitHub graph, blog engine, and case study format — so the site itself demonstrates what I build.",
@@ -282,7 +282,7 @@ export const PROJECTS_DATA: Project[] = [
       G --> H[Organizer Dashboard]
       H --> I[Analytics & Insights]`,
 
-    bookingUrl: "https://occazi.in"
+    bookingUrl: "https://cal.com/puneet426"
   }
 },
 ];

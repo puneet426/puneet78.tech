@@ -11,9 +11,7 @@ export default function Contact() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    // No backend wired up yet — this opens the visitor's mail client with
-    // the message pre-filled. Swap for a POST to Formspree, Resend, or
-    // your own API route when you're ready.
+
     const subject = encodeURIComponent(`Portfolio message from ${form.name}`);
     const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
     window.location.href = `mailto:${profile.email}?subject=${subject}&body=${body}`;
@@ -80,7 +78,7 @@ export default function Contact() {
           <div className="flex items-center gap-4 sm:col-span-2">
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-base transition-opacity hover:opacity-85"
+              className="inline-flex items-center gap-1.5 rounded-md bg-ink px-5 py-2.5  font-medium text-base transition-opacity hover:opacity-85"
             >
               Send message
               <ArrowUpRight size={15} />

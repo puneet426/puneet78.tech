@@ -9,12 +9,33 @@ interface TimelineDay {
   count: number;
 }
 
+interface PlatformTotals {
+  leetcode: number;
+  gfg: number;
+  hackerrank: number;
+  codingninjas: number;
+}
+
 interface LiveStatsPayload {
   activeDays: number;
   maxStreak: number;
   leetcodeBreakdown: { solved: number; easy: number; medium: number; hard: number };
   timeline: TimelineDay[];
+  totalProblems: number;
+  platformTotals: PlatformTotals | null;
+  codolioAvailable: boolean;
+  error?: boolean;
+  message?: string;
 }
+
+// Official brand logos via Simple Icons' free CDN — no hosting needed.
+// https://cdn.simpleicons.org/:slug renders the brand's real logo as an SVG.
+const PLATFORM_LOGOS = [
+  { key: "leetcode", label: "LeetCode", slug: "leetcode" },
+  { key: "gfg", label: "GeeksforGeeks", slug: "geeksforgeeks" },
+  { key: "hackerrank", label: "HackerRank", slug: "hackerrank" },
+  { key: "codingninjas", label: "Coding Ninjas", slug: "codingninjas" },
+] as const;
 
 export default function CodingStats() {
   const [liveData, setLiveData] = useState<LiveStatsPayload | null>(null);
@@ -23,15 +44,14 @@ export default function CodingStats() {
   // Hover Tooltip tracking references
   const [hoveredDay, setHoveredDay] = useState<TimelineDay | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ left: 0, top: 0 });
-  
+
   const sectionRef = useRef<HTMLDivElement>(null);
   const scrollTrackRef = useRef<HTMLDivElement>(null);
 
   // 🛠️ CONFIGURATION METRICS (Updated with your custom values)
   const MANUAL_STATS = {
-    totalProblems: 551,      
-    leetcodeRating: 1504,    
-    codechefRating: 1742,    
+    leetcodeRating: 1504,
+    codechefRating: 1742,
   };
 
   useEffect(() => {
@@ -42,6 +62,17 @@ export default function CodingStats() {
         setLiveData(data);
       } catch (err) {
         console.error("Error setting dynamic timeline blocks:", err);
+        setLiveData({
+          activeDays: 0,
+          maxStreak: 0,
+          leetcodeBreakdown: { solved: 0, easy: 0, medium: 0, hard: 0 },
+          timeline: [],
+          totalProblems: 0,
+          platformTotals: null,
+          codolioAvailable: false,
+          error: true,
+          message: "Could not reach the stats API.",
+        });
       } finally {
         setLoading(false);
       }
@@ -76,6 +107,17 @@ export default function CodingStats() {
     );
   }
 
+  // Surface real fetch/API failures instead of silently rendering zeros
+  if (liveData.error) {
+    return (
+      <div className="mx-auto w-full max-w-4xl px-4 py-16 text-center text-xs tracking-widest text-rose-500 uppercase font-mono">
+        Couldn&apos;t load live LeetCode stats{liveData.message ? `: ${liveData.message}` : ""}.
+        <br />
+        Try refreshing in a bit.
+      </div>
+    );
+  }
+
   // Segment linear history days array maps into clean, structured month buckets
   const monthsMap: { [key: string]: TimelineDay[] } = {};
   liveData.timeline.forEach((day) => {
@@ -90,10 +132,10 @@ export default function CodingStats() {
 
   return (
     <section ref={sectionRef} id="coding-profiles" className="mx-auto w-full max-w-4xl px-4 py-12 md:px-6 md:py-20 text-left text-neutral-800 dark:text-neutral-200 relative bg-transparent select-none">
-      
+
       {/* Floating Hover Tooltip Module */}
       {hoveredDay && (
-        <div 
+        <div
           style={{ left: `${tooltipPos.left}px`, top: `${tooltipPos.top}px` }}
           className="absolute z-50 pointer-events-none -translate-x-1/2 rounded-md bg-neutral-900 dark:bg-neutral-950 text-neutral-100 px-2.5 py-1.5 text-[11px] font-semibold border border-neutral-200 dark:border-neutral-800 shadow-xl flex flex-col items-center leading-none whitespace-nowrap"
         >
@@ -113,15 +155,26 @@ export default function CodingStats() {
 
       {/* 1. TOP PERFORMANCE DASHBOARD ROW */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {/* Total Problems */}
+        {/* Total Problems — sourced from Codolio's cross-platform aggregate */}
         <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/30 backdrop-blur-sm p-5 flex flex-col items-center justify-center text-center">
           <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Total Problems</span>
-          <span className="text-3xl font-black text-neutral-900 dark:text-white font-mono">{MANUAL_STATS.totalProblems}</span>
-          <div className="flex gap-1 mt-2 text-[9px] font-black text-neutral-500 uppercase tracking-wider">
-            <span className="bg-neutral-200/60 dark:bg-neutral-800/60 px-1.5 py-0.5 rounded">LC</span>
-            <span className="bg-neutral-200/60 dark:bg-neutral-800/60 px-1.5 py-0.5 rounded">CC</span>
-            <span className="bg-neutral-200/60 dark:bg-neutral-800/60 px-1.5 py-0.5 rounded">GFG</span>
+          <span className="text-3xl font-black text-neutral-900 dark:text-white font-mono">{liveData.totalProblems}</span>
+          <div className="flex gap-1.5 mt-2.5 items-center" title={liveData.codolioAvailable ? "Live from Codolio" : "Codolio unavailable — showing LeetCode only"}>
+            {PLATFORM_LOGOS.map((p) => (
+              <img
+                key={p.key}
+                src={`https://cdn.simpleicons.org/${p.slug}`}
+                alt={p.label}
+                title={p.label}
+                className="w-3.5 h-3.5 opacity-80 hover:opacity-100 transition-opacity"
+              />
+            ))}
           </div>
+          {!liveData.codolioAvailable && (
+            <span className="mt-1 text-[8px] font-bold text-neutral-400 dark:text-neutral-600 uppercase tracking-wider">
+              LeetCode only
+            </span>
+          )}
         </div>
 
         {/* Active Days */}
@@ -155,13 +208,38 @@ export default function CodingStats() {
         </div>
       </div>
 
+      {/* 1b. PER-PLATFORM BREAKDOWN ROW (only renders once Codolio data is live) */}
+      {liveData.codolioAvailable && liveData.platformTotals && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {PLATFORM_LOGOS.map((p) => (
+            <div
+              key={p.key}
+              className="rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50/40 dark:bg-neutral-900/20 px-3 py-2.5 flex items-center gap-2.5"
+            >
+              <img src={`https://cdn.simpleicons.org/${p.slug}`} alt={p.label} className="w-4 h-4 shrink-0" />
+              <div className="flex flex-col leading-tight">
+                <span className="text-sm font-black text-neutral-900 dark:text-white font-mono">
+                  {liveData.platformTotals![p.key]}
+                </span>
+                <span className="text-[8px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                  {p.label}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* 2. MAIN SUBMISSION CHARTS TIERS */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-stretch">
-        
+
         {/* Left Side: LeetCode Difficulty Solved Counters */}
         <div className="md:col-span-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50/30 dark:bg-neutral-950/30 backdrop-blur-sm p-5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <h3 className="font-sans text-sm font-black tracking-wider text-neutral-700 dark:text-neutral-200 uppercase">LeetCode</h3>
+            <h3 className="font-sans text-sm font-black tracking-wider text-neutral-700 dark:text-neutral-200 uppercase flex items-center gap-2">
+              <img src="https://cdn.simpleicons.org/leetcode" alt="LeetCode" className="w-4 h-4" />
+              LeetCode
+            </h3>
             <a href="https://leetcode.com/u/p_t626/" target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 inline-flex items-center gap-0.5 transition-colors">
               Profile <ArrowUpRight className="w-3 h-3" />
             </a>
@@ -203,7 +281,7 @@ export default function CodingStats() {
           </div>
 
           {/* Chronological Month Flex Track Container (Limited to 6 structural months) */}
-          <div 
+          <div
             ref={scrollTrackRef}
             className="flex gap-2 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory"
           >
@@ -219,11 +297,11 @@ export default function CodingStats() {
                     if (count > 3) nodeColor = "bg-emerald-500";
 
                     return (
-                      <div 
-                        key={dIdx} 
+                      <div
+                        key={dIdx}
                         onMouseMove={(e) => handleMouseMove(e, day)}
                         onMouseLeave={() => setHoveredDay(null)}
-                        className={`w-3.5 h-3.5 rounded-[2px] border border-transparent cursor-crosshair transition-all duration-150 hover:scale-125 hover:z-10 ${nodeColor}`} 
+                        className={`w-3.5 h-3.5 rounded-[2px] border border-transparent cursor-crosshair transition-all duration-150 hover:scale-125 hover:z-10 ${nodeColor}`}
                       />
                     );
                   })}
@@ -238,7 +316,7 @@ export default function CodingStats() {
       {/* Footer Complete Profile Link */}
       <div className="mt-8 text-center">
         <a href="https://codolio.com/profile/p_t626" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-400 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors group">
-          View complete profile on Codolio 
+          View complete profile on Codolio
           <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </a>
       </div>

@@ -42,7 +42,7 @@ const SKILLS_DATA: SkillCategory[] = [
       { name: "Express", icon: "/technology/expressjs-dark.svg" },
       { name: "Zod", icon: "/technology/zod.svg" },
       { name: "Vitest", icon: "/technology/vitest.svg" },
-      { name: "WebSocket", icon: "/technology/ws.svg" }, // standard multicolored fallback
+      
     ],
   },
   {

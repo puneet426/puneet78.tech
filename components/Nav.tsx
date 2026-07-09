@@ -108,11 +108,11 @@ export default function Nav({ onToggleMinimal, onToggleMobileMenu }: NavProps) {
             <kbd className="text-xs bg-neutral-200 dark:bg-neutral-800 px-1.5 py-0.5 rounded border border-neutral-300 dark:border-neutral-700 font-sans shadow-sm opacity-80">K</kbd>
           </button>
 
-          {/* Minimal Mode Toggle Layout Trigger Button */}
+          
           <button 
             type="button"
             data-keyboard-bypass="true"
-            onClick={onToggleMinimal} // 🚀 Direct Props trigger call execution hook
+            onClick={onToggleMinimal} 
             className="hidden sm:flex rounded-lg p-2 text-neutral-500 dark:text-neutral-400 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100" 
             title="Switch to minimal sidebar navigation" 
             aria-label="Switch to minimal sidebar navigation"
@@ -122,7 +122,7 @@ export default function Nav({ onToggleMinimal, onToggleMobileMenu }: NavProps) {
             </svg>
           </button>
 
-          {/* Theme Control Trigger */}
+          
           <button 
             onClick={toggleTheme}
             data-keyboard-bypass="true"
@@ -140,11 +140,11 @@ export default function Nav({ onToggleMinimal, onToggleMobileMenu }: NavProps) {
             )}
           </button>
 
-          {/* Mobile Navigation Dropdown Menu Panel Button Trigger */}
+          
           <div className="md:hidden">
             <button 
               type="button"
-              onClick={onToggleMobileMenu} // 🚀 Direct Props trigger call execution hook
+              onClick={onToggleMobileMenu} 
               aria-label="Open navigation" 
               className="rounded-lg p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-900 hover:text-neutral-900 dark:hover:text-neutral-100"
             >

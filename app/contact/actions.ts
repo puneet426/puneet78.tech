@@ -6,14 +6,16 @@ export async function submitContactForm(prevState: any, formData: FormData) {
   const subject = formData.get("subject")?.toString().trim();
   const message = formData.get("message")?.toString().trim();
 
-  // Validate required inputs
   if (!name || !email || !message) {
     return { success: false, error: "Please fill all required fields." };
   }
 
   try {
-    // 📨 Swap with your actual Formspree / Web3Forms dashboard key string!
-    const formAccessKey = "YOUR_FORMSPREE_OR_WEB3FORMS_KEY"; 
+    const formAccessKey = process.env.NEXT_PUBLIC_WEB3FORMS_KEY; 
+
+    if (!formAccessKey) {
+      return { success: false, error: "Configuration Error: Access key is missing." };
+    }
 
     const response = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
@@ -22,15 +24,33 @@ export async function submitContactForm(prevState: any, formData: FormData) {
         access_key: formAccessKey,
         name,
         email,
-        subject: subject || "New Contact Form Portfolio Query",
+        subject: subject || `New Portfolio Query from ${name}`,
         message,
+        from_name: "Portfolio Contact Form",
       }),
     });
 
-    if (!response.ok) throw new Error("API Forwarding Failed");
+    // 🚀 FIX: Read as raw text first to avoid breaking JSON token crashes
+    const responseText = await response.text();
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Web3Forms returned non-JSON response HTML body:", responseText);
+      return { 
+        success: false, 
+        error: "The submission server returned an unexpected error page. Please check your key configuration." 
+      };
+    }
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "API Forwarding Failed");
+    }
 
     return { success: true, error: null };
-  } catch (error) {
-    return { success: false, error: "Something went wrong. Please try again later." };
+  } catch (error: any) {
+    console.error("Contact Form Submission Error:", error);
+    return { success: false, error: error.message || "Something went wrong. Please try again later." };
   }
 }

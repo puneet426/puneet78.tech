@@ -23,90 +23,103 @@ interface CompanyExperience {
 }
 
 const EXPERIENCE_DATA: CompanyExperience[] = [
-  {
-    id: "shreesam",
-    companyName: "Shreesam",
-    location: "Noida, Uttar Pradesh",
-    logo: "/shreesam.png",
-    isCurrent: true,
-    roles: [
-      {
-        title: "Full Stack Developer",
-        type: "Full-time",
-        timeline: "July 2024 - Present",
-        tech: [
-          { name: "React", icon: "/technology/react.svg" },
-          { name: "TypeScript", icon: "/technology/typescript.svg" },
-          { name: "Node.js", icon: "/technology/nodejs.svg" },
-          { name: "Express", icon: "/technology/expressjs-dark.svg" },
-          { name: "Next.js", icon: "/technology/nextjs-dark.svg" },
-          { name: "PostgreSQL", icon: "/technology/postgresql.svg" },
-          { name: "MongoDB", icon: "/technology/mongodb.svg" },
-          { name: "Prisma", icon: "/technology/prisma-dark.svg" },
-          { name: "Drizzle", icon: "/technology/drizzle-dark.svg" },
-          { name: "Vitest", icon: "/technology/vitest.svg" },
-          { name: "AWS", icon: "/technology/aws-dark.svg" },
-          { name: "Turborepo", icon: "/technology/turborepo-dark.svg" },
-          { name: "Redux", icon: "/technology/redux.svg" },
-          { name: "Zustand", icon: "/technology/zustand.svg" },
-          { name: "React Query", icon: "/technology/reactquery.svg" },
-          { name: "Git", icon: "/technology/git.svg" }
-        ],
-        bulletPoints: [
-          "Architected and delivered multiple full-stack web applications from conception to production, serving enterprise clients with 10,000+ active users.",
-          "Optimized website performance, improving Core Web Vitals scores by 60% through lazy loading, image compression, CDN integration, and code splitting.",
-          "Spearheaded development of RBAC-based SaaS platforms with dynamic user roles and multi-tenant architecture, onboarding 400+ customers.",
-          "Integrated AWS cloud services for scalable file storage and database management, achieving 30% cost reduction while handling 3x traffic growth.",
-          "Implemented comprehensive testing strategies using Vitest and Jest, achieving 85%+ code coverage and reducing production bugs by 60%."
-        ]
-      },
-      {
-        title: "Web Developer Intern",
-        type: "Internship",
-        timeline: "May 2024 - July 2024",
-        tech: [
-          { name: "React", icon: "/technology/react.svg" },
-          { name: "Tailwind CSS", icon: "/technology/tailwindcss.svg" },
-          { name: "Three.js", icon: "/technology/threejs-dark.svg" },
-          { name: "GSAP", icon: "/technology/gsap.svg" },
-          { name: "JavaScript", icon: "/technology/js.svg" },
-          { name: "JWT", icon: "/technology/jwt.svg" },
-          { name: "Git", icon: "/technology/git.svg" },
-          { name: "GitHub", icon: "/technology/github-dark.svg" }
-        ],
-        bulletPoints: [
-          "Led end-to-end migration of legacy company application, achieving a 95% performance improvement and reducing page load times from 8+ seconds to under 400ms.",
-          "Implemented comprehensive testing strategies using Vitest and Jest, achieving 85%+ code coverage and reducing production bugs by 60%."
-        ]
-      }
-    ]
-  },
-  {
-    id: "gssoc",
-    companyName: "GirlScript Summer of Code",
-    location: "Remote",
-    logo: "/gssoc.png",
-    isCurrent: false,
-    roles: [
-      {
-        title: "Mentor",
-        type: "Open Source",
-        timeline: "Aug 2024 - Sep 2024",
-        tech: [
-          { name: "Git", icon: "/technology/git.svg" },
-          { name: "GitHub", icon: "/technology/github-dark.svg" },
-          { name: "JavaScript", icon: "/technology/js.svg" },
-          { name: "React", icon: "/technology/react.svg" },
-          { name: "Next.js", icon: "/technology/nextjs-dark.svg" }
-        ],
-        bulletPoints: [
-          "Led Code Reviews and PR Merging — Guided contributors in resolving doubts and debugging issues, ensuring high-quality code before merging pull requests.",
-          "Maintained Code Quality and Best Practices — Enforced TypeScript, ESLint, Prettier, and CI/CD workflows (GitHub Actions) in an open-source environment.",
-          "Mentored developers on Git workflows, collaborative development, and improved project documentation."
-        ]
-      }
-    ]
-  }
+{
+  "id": "shreesam",
+  "companyName": "Shreesam",
+  "location": "Noida, Uttar Pradesh",
+  "logo": "/shreesam.png",
+  "isCurrent": true,
+  "roles": [
+    {
+      "title": "Full Stack Developer",
+      "type": "Full-time",
+      "timeline": "Jan 2026 - Present",
+      "tech": [
+        { "name": "React", "icon": "/technology/react.svg" },
+        { "name": "TypeScript", "icon": "/technology/typescript.svg" },
+        { "name": "Node.js", "icon": "/technology/nodejs.svg" },
+        { "name": "Express", "icon": "/technology/expressjs-dark.svg" },
+        { "name": "Next.js", "icon": "/technology/nextjs-dark.svg" },
+        { "name": "PostgreSQL", "icon": "/technology/postgresql.svg" },
+        { "name": "Prisma", "icon": "/technology/prisma-dark.svg" },
+        { "name": "AWS", "icon": "/technology/aws-dark.svg" },
+        { "name": "Turborepo", "icon": "/technology/turborepo-dark.svg" },
+        { "name": "Zustand", "icon": "/technology/zustand.svg" },
+        { "name": "React Query", "icon": "/technology/reactquery.svg" },
+        { "name": "Git", "icon": "/technology/git.svg" }
+      ],
+      "bulletPoints": [
+        "Architected and engineered a highly scalable, multi-tenant Fintech School Management ERP designed to support 10+ schools and over 5000+ active users across an administrative dashboard and dual mobile applications.",
+        "Designed an abstract dynamic billing engine using PostgreSQL and Prisma 7, allowing schools to provision completely custom fee structures (class, section, and student-specific) and automate dynamic invoicing schedules.",
+        "Built a production-grade, append-only immutable ledger accounting system to strictly log all debits and credits, completely eliminating financial discrepancies by replacing floating-point data types with arbitrary-precision Decimal structures.",
+        "Integrated an advanced Razorpay split-payment gateway marketplace architecture, enabling automated payment routing directly to school-specific merchant accounts while handling complex payment behaviors like partial payments, advance collections, and localized fine engines.",
+        "Orchestrated the cross-app unification of a Next.js admin dashboard and two React Native Expo mobile applications (Student & Teacher) driven by a single Express.js REST API with zero-leak Role-Based Access Control (RBAC).",
+        "Successfully overhauled database infrastructure by migrating to the Prisma 7 framework, implementing native PostgreSQL driver adapters and connection pooling over AWS/Neon to prevent performance degradation under concurrent connection spikes."
+      ]
+    },
+    {
+      "title": "Web Developer Intern",
+      "type": "Internship",
+      "timeline": "Dec 2025 - Jan 2026",
+      "tech": [
+        { "name": "React", "icon": "/technology/react.svg" },
+        { "name": "Tailwind CSS", "icon": "/technology/tailwindcss.svg" },
+        { "name": "JavaScript", "icon": "/technology/js.svg" },
+        { "name": "JWT", "icon": "/technology/jwt.svg" },
+        { "name": "Git", "icon": "/technology/git.svg" },
+        { "name": "GitHub", "icon": "/technology/github-dark.svg" }
+      ],
+      "bulletPoints": [
+        "Led the end-to-end frontend performance optimization of legacy student portal workflows, boosting Core Web Vitals scores by 60% through aggressive code-splitting, lazy loading, and asset optimization pipelines.",
+        "Designed responsive user interface frameworks with React and Tailwind CSS, reducing average initial page load times from 8+ seconds down to under 400ms to heavily improve mobile engagement metrics."
+      ]
+    }
+  ]
+},
+
+ {
+  id: "gssoc",
+  companyName: "GirlScript Summer of Code",
+  location: "Remote",
+  logo: "/gssoc.png",
+  isCurrent: false,
+  roles: [
+    {
+      title: "Open Source Contributor",
+      type: "Open Source",
+      timeline: "May 2024 - Jul 2024",
+      tech: [
+        { name: "Git", icon: "/technology/git.svg" },
+        { name: "GitHub", icon: "/technology/github-dark.svg" },
+        { name: "JavaScript", icon: "/technology/js.svg" },
+        { name: "React", icon: "/technology/react.svg" },
+        { name: "Next.js", icon: "/technology/nextjs-dark.svg" }
+      ],
+      bulletPoints: [
+        "Contributed to multiple open-source projects by implementing new features, fixing bugs, and improving project documentation.",
+        "Collaborated with maintainers through GitHub Issues and Pull Requests while following industry-standard Git workflows.",
+        "Enhanced React and Next.js codebases by writing clean, maintainable, and production-ready code."
+      ]
+    },
+    {
+      title: "Open Source Mentor",
+      type: "Open Source",
+      timeline: "Aug 2024 - Sep 2024",
+      tech: [
+        { name: "Git", icon: "/technology/git.svg" },
+        { name: "GitHub", icon: "/technology/github-dark.svg" },
+        { name: "JavaScript", icon: "/technology/js.svg" },
+        { name: "React", icon: "/technology/react.svg" },
+        { name: "Next.js", icon: "/technology/nextjs-dark.svg" }
+      ],
+      bulletPoints: [
+        "Mentored open-source contributors by reviewing pull requests, resolving implementation issues, and providing technical guidance throughout the program.",
+        "Collaborated with project maintainers to maintain code quality, validate feature implementations, and ensure smooth contribution workflows.",
+        "Helped contributors understand Git/GitHub workflows, issue tracking, documentation standards, and best practices for open-source development."
+      ]
+    }
+  ]
+}
 ];
 
 export default function Experience() {

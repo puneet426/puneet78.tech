@@ -114,7 +114,7 @@ export default function Hero() {
           {/* Resume Button */}
           <a 
             className="inline-flex items-center tracking-normal transition-all duration-150 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 bg-indigo-500 dark:bg-indigo-400 text-white border border-transparent hover:opacity-90 active:scale-95 px-4 py-2 text-[15px] gap-2 rounded-lg font-medium shadow-md"
-            href="/resume" 
+            href="https://media.licdn.com/dms/image/v2/D562DAQHnkiK5DmudBg/profile-treasury-document-images_1920/B56Z.vHDq5HUAk-/1/1785349291823?e=1785974400&v=beta&t=eVcSqoYFJm7gzC0SXULaNLf7ZSaXuQ0JpmBDvffzhY0" 
             target="_blank" 
             rel="noopener noreferrer"
           >

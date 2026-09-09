@@ -8,23 +8,41 @@ export interface CaseStudyDetails {
   problemText: string;
   approachText: string;
   outcomesList: string[];
+
   overviewParagraphs: string[];
   problemStatementLong: string;
+
   painPoints: string[];
   functionalGoals: string[];
   nonFunctionalGoals: string[];
   successCriteria: string[];
   roleResponsibilities: string[];
+
   techStackRationale: string;
   architectureDiagramSource: string;
-  keyFeatures: { title: string; desc: string; highlightWord?: string }[];
+
+  keyFeatures: {
+    title: string;
+    desc: string;
+    highlightWord?: string;
+  }[];
+
   processChallenges: string[];
   uxProductDecisions: string[];
+
+  // PeerReview-specific sections
+  securityNotes?: string[];
+  dataModelNotes?: string[];
+  gamificationNotes?: string[];
+  plansAndBilling?: string[];
+  scalingNotes?: string[];
+  knownLimitations?: string[];
+
   futureImprovements: string[];
+
   userFlowDiagramSource: string;
   bookingUrl: string;
 }
-
 
 export interface Project {
   slug: string;
@@ -34,10 +52,14 @@ export interface Project {
   description: string;
   italicNote: string;
   image: string;
-  status: "Live" | "In Production" | "Upgrading"; // 
+  status: "Live" | "In Production" | "Upgrading";
+
   tech: ProjectTech[];
   extraTechCount: number;
+
   liveUrl: string;
+  repoUrl?: string;
+
   caseStudy: CaseStudyDetails;
 }
 

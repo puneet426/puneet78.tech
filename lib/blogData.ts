@@ -7,6 +7,9 @@ export interface CodeSnippetItem {
 export interface ContentSection {
   heading: string;
   content: string[];
+  // Optional extras rendered right after the paragraphs of this section
+  bullets?: string[];
+  snippets?: CodeSnippetItem[];
 }
 
 export interface BlogAuthor {
@@ -37,7 +40,9 @@ export interface BlogPost {
   author: BlogAuthor;
 }
 
-export const BLOG_POSTS: BlogPost[] = [
+import { SYSTEM_DESIGN_POSTS } from "./systemDesign";
+
+const CORE_POSTS: BlogPost[] = [
   {
     slug: "javascript-fundamentals-complete-guide-part-1",
     title: "JavaScript Fundamentals: A Complete Beginner's Guide (Part 1)",
@@ -1593,3 +1598,6 @@ export const BLOG_POSTS: BlogPost[] = [
 
 
 ];
+
+// Existing articles first (the home page features the first two), then the 30-day system design series
+export const BLOG_POSTS: BlogPost[] = [...CORE_POSTS, ...SYSTEM_DESIGN_POSTS];

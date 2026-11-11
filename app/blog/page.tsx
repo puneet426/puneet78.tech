@@ -1,13 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Clock } from "lucide-react";
 import { BLOG_POSTS } from "@/lib/blogData";
 
+const FILTERS = ["All", "System Design", "Web Development"] as const;
+type Filter = (typeof FILTERS)[number];
+
+const isSystemDesign = (tags: string[]) => tags.includes("System Design");
+
 export default function BlogArchivePage() {
+  const [filter, setFilter] = useState<Filter>("All");
+
+  const posts = BLOG_POSTS.filter((post) => {
+    if (filter === "System Design") return isSystemDesign(post.tags);
+    if (filter === "Web Development") return !isSystemDesign(post.tags);
+    return true;
+  });
+
   return (
     <section className="mx-auto w-full max-w-4xl px-4 py-12 md:px-6 md:py-20 font-sans text-left select-none text-neutral-800 dark:text-neutral-200">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
@@ -17,18 +30,35 @@ export default function BlogArchivePage() {
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.25em] text-indigo-600 dark:text-indigo-400">Writing</p>
           <h2 className="text-4xl md:text-5xl font-black tracking-tight text-neutral-900 dark:text-white uppercase mb-3">Blog</h2>
           <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400 max-w-xl leading-relaxed">
-            Mixed writing on software engineering, web architectures, and ideas worth sharing.
+            Mixed writing on software engineering, web architectures, system design, and ideas worth sharing.
           </p>
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-8 flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                filter === f
+                  ? "border-indigo-500/40 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                  : "border-neutral-200 dark:border-neutral-800/80 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
 
         {/* Dynamic Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          {BLOG_POSTS.map((post, idx) => (
+          {posts.map((post, idx) => (
             <motion.div
               key={post.slug}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: idx * 0.08 }}
+              transition={{ duration: 0.4, delay: Math.min(idx, 8) * 0.06 }}
               className="flex flex-col rounded-2xl border border-neutral-200 dark:border-neutral-800/80 bg-neutral-50/50 dark:bg-[#141414]/40 backdrop-blur-sm overflow-hidden group hover:border-indigo-500/20 dark:hover:border-neutral-700/60 transition-all duration-300 shadow-sm dark:shadow-none"
             >
               {/* Card Banner Image Wrapper */}

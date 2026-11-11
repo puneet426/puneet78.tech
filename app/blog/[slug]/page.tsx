@@ -34,7 +34,7 @@ export default function DynamicBlogPostView() {
   const RenderSnippet = (snippet: CodeSnippetItem, groupIndex: string) => {
     const uniqueId = `${groupIndex}-${snippet.filename}`;
     return (
-      <div key={snippet.filename} className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-[#0c0c0c] overflow-hidden font-mono text-xs my-5 shadow-inner dark:shadow-none">
+      <div key={uniqueId} className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-[#0c0c0c] overflow-hidden font-mono text-xs my-5 shadow-inner dark:shadow-none">
         {snippet.title && (
           <div className="px-4 pt-2.5 text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider select-none bg-neutral-100/40 dark:bg-[#111]/30">
             // {snippet.title}
@@ -131,6 +131,14 @@ export default function DynamicBlogPostView() {
             {section.content.map((p, i) => (
               <p key={`${section.heading}-${i}`}>{p}</p>
             ))}
+            {section.bullets && (
+              <ul className="list-disc space-y-2 pl-5 marker:text-indigo-500">
+                {section.bullets.map((b, i) => (
+                  <li key={`${section.heading}-b-${i}`}>{b}</li>
+                ))}
+              </ul>
+            )}
+            {section.snippets?.map((s) => RenderSnippet(s, `sec-${section.heading}`))}
           </div>
         ))}
 

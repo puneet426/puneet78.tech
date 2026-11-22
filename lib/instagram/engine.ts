@@ -92,17 +92,22 @@ export async function handleComment(ownAccountId: string, c: CommentValue) {
       const recipient = { comment_id: c.id };
       let res: { recipient_id?: string };
       try {
-        res = await sendButtons(recipient, text, [
-          {
-            type: "postback",
-            title: btnTitle(automation.openingButton),
-            payload: PAYLOAD_PREFIX + automation.id,
-          },
-        ]);
+        res = await sendButtons(
+          recipient,
+          text,
+          [
+            {
+              type: "postback",
+              title: btnTitle(automation.openingButton),
+              payload: PAYLOAD_PREFIX + automation.id,
+            },
+          ],
+          ownAccountId
+        );
       } catch (e) {
         // Fallback if buttons are rejected for private replies: plain text, user replies to continue.
         console.warn("[instagram] button private reply failed, falling back to text", e);
-        res = await sendText(recipient, `${text}\n\n(Reply "YES" to get it)`);
+        res = await sendText(recipient, `${text}\n\n(Reply "YES" to get it)`, ownAccountId);
       }
       // Remember which automation this user is in, so a tap OR any reply continues the flow.
       const igsid = res.recipient_id ?? c.from!.id;
@@ -148,28 +153,38 @@ export async function handleMessaging(ownAccountId: string, m: MessagingEvent) {
 
   try {
     if (automation.followGate && !(await userFollowsMe(userId))) {
-      await sendButtons({ id: userId }, fill(automation.notFollowingDm, username), [
-        {
-          type: "postback",
-          title: btnTitle(automation.notFollowingButton),
-          payload: PAYLOAD_PREFIX + automation.id,
-        },
-      ]);
+      await sendButtons(
+        { id: userId },
+        fill(automation.notFollowingDm, username),
+        [
+          {
+            type: "postback",
+            title: btnTitle(automation.notFollowingButton),
+            payload: PAYLOAD_PREFIX + automation.id,
+          },
+        ],
+        ownAccountId
+      );
       await logEvent({ event: "not_following", automationId, username });
       return;
     }
 
     const text = fill(automation.deliveryDm, username);
     if (automation.deliveryLinkUrl) {
-      await sendButtons({ id: userId }, text, [
-        {
-          type: "web_url",
-          title: btnTitle(automation.deliveryLinkTitle || "Open link"),
-          url: automation.deliveryLinkUrl,
-        },
-      ]);
+      await sendButtons(
+        { id: userId },
+        text,
+        [
+          {
+            type: "web_url",
+            title: btnTitle(automation.deliveryLinkTitle || "Open link"),
+            url: automation.deliveryLinkUrl,
+          },
+        ],
+        ownAccountId
+      );
     } else {
-      await sendText({ id: userId }, text);
+      await sendText({ id: userId }, text, ownAccountId);
     }
     await clearPending(userId);
     await logEvent({ event: "delivered", automationId, username });

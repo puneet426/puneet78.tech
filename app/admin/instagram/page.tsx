@@ -46,7 +46,7 @@ const blankAutomation = (): Automation => ({
   notFollowingButton: "I followed ✅",
   deliveryDm: "Here you go {username} 🎉",
   deliveryLinkTitle: "Open link",
-  deliveryLinkUrl: "https://puneet78.tech",
+  deliveryLinkUrl: "https://puneet.occazi.in",
 });
 
 const card = "rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/60 dark:bg-neutral-900/60 p-5";

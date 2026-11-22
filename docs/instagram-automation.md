@@ -15,7 +15,7 @@ Someone comments on your reel
 ```
 
 - Works on **any comment** by default; add per-reel or keyword automations from the dashboard.
-- Dashboard at **`https://puneet78.tech/admin/instagram`**: edit messages, pick reels, toggle the follow-gate, see the funnel (comments → DMs → taps → delivered) and a live activity log.
+- Dashboard at **`https://puneet.occazi.in/admin/instagram`**: edit messages, pick reels, toggle the follow-gate, see the funnel (comments → DMs → taps → delivered) and a live activity log.
 - Uses Meta's **official** Instagram API (the same one ManyChat uses), so it's allowed and safe for your account.
 
 ## Files
@@ -64,7 +64,7 @@ Redeploy.
 ### 5. Subscribe the webhook
 In **Instagram → API setup with Instagram login → Configure webhooks**:
 
-- Callback URL: `https://puneet78.tech/api/instagram/webhook`
+- Callback URL: `https://puneet.occazi.in/api/instagram/webhook`
 - Verify token: your `IG_VERIFY_TOKEN`
 - **Verify and save**, then subscribe to these fields:
   **`comments`**, **`messages`**, **`messaging_postbacks`**

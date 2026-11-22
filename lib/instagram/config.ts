@@ -28,7 +28,7 @@ export const defaultAutomations: Automation[] = [
     notFollowingButton: "I followed ✅",
     deliveryDm: "Here you go {username} 🎉\n\nFollow for daily dev content 🔥",
     deliveryLinkTitle: "Open link",
-    deliveryLinkUrl: "https://puneet78.tech",
+    deliveryLinkUrl: "https://puneet.occazi.in",
   },
 ];
 

@@ -1,12 +1,20 @@
 import crypto from "crypto";
 
 /**
- * "Instagram API with Instagram Login" (graph.instagram.com).
- * Token permissions needed:
- *   instagram_business_basic, instagram_business_manage_comments,
- *   instagram_business_manage_messages
+ * Works with both Meta setups:
+ *
+ *  - Unified login (new apps, Facebook Login for Business + system user token):
+ *      IG_API_HOST=graph.facebook.com
+ *      IG_ACCOUNT_ID=<your Instagram account ID, e.g. 17841456940409493>
+ *  - Instagram login (older apps): leave IG_API_HOST unset (graph.instagram.com).
+ *
+ * IG_MESSAGING_ID: the ID that sends DMs. Defaults to IG_ACCOUNT_ID; set it to your
+ * Facebook Page ID if Meta requires Page-based messaging for your app.
  */
-const GRAPH = `${process.env.IG_GRAPH_BASE || "https://graph.instagram.com"}/${process.env.IG_GRAPH_VERSION || "v23.0"}`;
+const HOST = process.env.IG_GRAPH_BASE || `https://${process.env.IG_API_HOST || "graph.instagram.com"}`;
+const GRAPH = `${HOST}/${process.env.IG_GRAPH_VERSION || "v23.0"}`;
+const ACCOUNT = process.env.IG_ACCOUNT_ID || "me";
+const SENDER = process.env.IG_MESSAGING_ID || ACCOUNT;
 
 function token(): string {
   const t = process.env.IG_ACCESS_TOKEN;
@@ -40,14 +48,14 @@ export function replyToComment(commentId: string, message: string) {
 }
 
 export function sendText(recipient: Recipient, text: string) {
-  return call<{ recipient_id?: string }>(`/me/messages`, {
+  return call<{ recipient_id?: string }>(`/${SENDER}/messages`, {
     body: { recipient, message: { text } },
   });
 }
 
 /** DM with up to 3 buttons (button template). Text max 640 chars, title max 20 chars. */
 export function sendButtons(recipient: Recipient, text: string, buttons: Button[]) {
-  return call<{ recipient_id?: string }>(`/me/messages`, {
+  return call<{ recipient_id?: string }>(`/${SENDER}/messages`, {
     body: {
       recipient,
       message: {
@@ -81,7 +89,7 @@ export type Media = {
 
 export async function listRecentMedia(limit = 30): Promise<Media[]> {
   const r = await call<{ data: Media[] }>(
-    `/me/media?fields=id,caption,media_product_type,thumbnail_url,media_url,permalink,timestamp&limit=${limit}`,
+    `/${ACCOUNT}/media?fields=id,caption,media_product_type,thumbnail_url,media_url,permalink,timestamp&limit=${limit}`,
     { method: "GET" }
   );
   return r.data;

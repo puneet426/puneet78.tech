@@ -1,0 +1,38 @@
+import type { Automation } from "./types";
+
+/**
+ * Default automations — used until you save your own from the /admin/instagram dashboard.
+ * Automations are checked top to bottom; the first match wins, so put specific
+ * (per-reel / keyword) automations above the catch-all.
+ *
+ * Placeholders: {username}
+ */
+export const defaultAutomations: Automation[] = [
+  {
+    id: "default",
+    name: "Every comment on every reel",
+    enabled: true,
+    mediaIds: [],
+    keywords: [],
+    publicReplies: [
+      "Thanks @{username}! Check your DMs 📩",
+      "Appreciate it @{username} 🙌 Sent you a DM!",
+      "@{username} glad you liked it! DM'd you 🚀",
+    ],
+    openingDm:
+      "Hey {username}! 👋 Thanks for commenting on my reel. Tap the button below and I'll send it over 👇",
+    openingButton: "Send me the link",
+    followGate: true,
+    notFollowingDm:
+      "Almost there {username}! 🙏 This is for my followers only. Follow @codewith.pt and then tap the button below 👇",
+    notFollowingButton: "I followed ✅",
+    deliveryDm: "Here you go {username} 🎉\n\nFollow for daily dev content 🔥",
+    deliveryLinkTitle: "Open link",
+    deliveryLinkUrl: "https://puneet78.tech",
+  },
+];
+
+/** Only reels trigger automations (set false to include feed posts). */
+export const REELS_ONLY = true;
+/** Ignore replies inside comment threads, respond to top-level comments only. */
+export const TOP_LEVEL_ONLY = true;

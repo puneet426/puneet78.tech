@@ -1,0 +1,60 @@
+import { NextRequest, NextResponse } from "next/server";
+import { isValidSignature } from "@/lib/instagram/api";
+import {
+  handleComment,
+  handleMessaging,
+  type CommentValue,
+  type MessagingEvent,
+} from "@/lib/instagram/engine";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+type WebhookBody = {
+  object?: string;
+  entry?: {
+    id: string; // your IG professional account id
+    changes?: { field: string; value: CommentValue }[];
+    messaging?: MessagingEvent[];
+  }[];
+};
+
+/** Webhook verification handshake (Meta calls this once when you subscribe). */
+export async function GET(req: NextRequest) {
+  const p = req.nextUrl.searchParams;
+  if (
+    p.get("hub.mode") === "subscribe" &&
+    p.get("hub.verify_token") === process.env.IG_VERIFY_TOKEN
+  ) {
+    return new NextResponse(p.get("hub.challenge") ?? "", { status: 200 });
+  }
+  return new NextResponse("Forbidden", { status: 403 });
+}
+
+/** Comment + DM events land here. Subscribe to: comments, messages, messaging_postbacks. */
+export async function POST(req: NextRequest) {
+  const raw = await req.text();
+  if (!isValidSignature(raw, req.headers.get("x-hub-signature-256"))) {
+    return new NextResponse("Invalid signature", { status: 401 });
+  }
+
+  let body: WebhookBody;
+  try {
+    body = JSON.parse(raw);
+  } catch {
+    return new NextResponse("Bad JSON", { status: 400 });
+  }
+
+  const jobs: Promise<void>[] = [];
+  for (const entry of body.entry ?? []) {
+    for (const change of entry.changes ?? []) {
+      if (change.field === "comments") jobs.push(handleComment(entry.id, change.value));
+    }
+    for (const m of entry.messaging ?? []) jobs.push(handleMessaging(entry.id, m));
+  }
+
+  // Finish the work before responding — serverless functions may freeze after the response.
+  const results = await Promise.allSettled(jobs);
+  for (const r of results) if (r.status === "rejected") console.error("[instagram]", r.reason);
+  return NextResponse.json({ ok: true });
+}

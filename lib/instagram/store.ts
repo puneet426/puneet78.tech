@@ -105,6 +105,21 @@ export function clearPending(igsid: string) {
   return del(`pending:${igsid}`);
 }
 
+// ---------- hourly rate limits (stay under Meta's automation limits) ----------
+/** Increments this hour's counter for `kind` and returns the new count. */
+export async function hitHourly(kind: string): Promise<number> {
+  const hour = new Date().toISOString().slice(0, 13); // e.g. 2026-11-22T14
+  const key = `rate:${kind}:${hour}`;
+  if (hasPersistentStore) {
+    const n = await redis<number>("INCR", P + key);
+    if (n === 1) await redis("EXPIRE", P + key, 7200);
+    return n;
+  }
+  const n = Number((await get(key)) ?? 0) + 1;
+  await set(key, String(n), 7200);
+  return n;
+}
+
 // ---------- logs + funnel stats ----------
 const MAX_LOGS = 300;
 

@@ -29,6 +29,7 @@ const EVENT_LABEL: Record<LogEvent, string> = {
   click: "👆 Tapped / replied",
   not_following: "🔒 Not following",
   delivered: "✅ Delivered",
+  rate_limited: "⏸️ Hourly limit",
   error: "⚠️ Error",
 };
 

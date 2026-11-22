@@ -33,6 +33,7 @@ export type LogEvent =
   | "click"
   | "not_following"
   | "delivered"
+  | "rate_limited"
   | "error";
 
 export type LogEntry = {

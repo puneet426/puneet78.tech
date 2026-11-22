@@ -60,7 +60,7 @@ export default function Nav({ onToggleMinimal, onToggleMobileMenu }: NavProps) {
             >
               <Image 
                 alt="Puneet Tiwari" 
-                src="/profile.webp" 
+                src="/profile-photo.webp" 
                 fill 
                 sizes="32px"
                 className="object-cover group-hover:scale-105 transition-transform duration-300" 

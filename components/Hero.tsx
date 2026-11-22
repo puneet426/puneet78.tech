@@ -30,7 +30,7 @@ export default function Hero() {
           <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full ring-2 ring-indigo-500/40">
             <Image 
               alt="Puneet Tiwari" 
-              src="/profile.webp" // Make sure to drop your profile image into the public folder as profile.webp
+              src="/profile-photo.webp" // Make sure to drop your profile image into the public folder as profile.webp
               fill
               sizes="36px"
               priority

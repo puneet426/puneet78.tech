@@ -38,12 +38,12 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/profile.webp",
-        href: "/profile.webp",
+        url: "/profile-photo.webp",
+        href: "/profile-photo.webp",
       }
     ],
-    shortcut: "/profile.webp",
-    apple: "/profile.webp",
+    shortcut: "/profile-photo.webp",
+    apple: "/profile-photo.webp",
   },
   openGraph: {
     title: "Puneet Tiwari | Full-Stack Developer & Software Engineer",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     siteName: "Puneet Tiwari Portfolio",
     images: [
       {
-        url: "/profile.webp", 
+        url: "/profile-photo.webp", 
         width: 800,
         height: 800,
         alt: "Puneet Tiwari Portfolio Preview",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     card: "summary",
     title: "Puneet Tiwari | Full-Stack Developer & Software Engineer",
     description: "Portfolio of Puneet Tiwari. Turning ideas into production apps with Next.js and Node.js.",
-    images: ["/profile.webp"],
+    images: ["/profile-photo.webp"],
   },
 };
 

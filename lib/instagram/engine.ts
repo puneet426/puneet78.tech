@@ -7,6 +7,7 @@ import {
 } from "./api";
 import {
   claimOnce,
+  hitHourly,
   clearPending,
   getAutomations,
   getPending,
@@ -30,6 +31,13 @@ import type { Automation } from "./types";
  */
 
 const PAYLOAD_PREFIX = "IGAUTO:";
+
+/**
+ * Safety limits per hour. Meta allows ~200 automated DMs/hour per account; repeated public
+ * replies are what Instagram's spam filter notices first. Override with env vars if needed.
+ */
+const MAX_DMS_PER_HOUR = Number(process.env.IG_MAX_DMS_PER_HOUR) || 150;
+const MAX_PUBLIC_REPLIES_PER_HOUR = Number(process.env.IG_MAX_PUBLIC_REPLIES_PER_HOUR) || 50;
 
 export type CommentValue = {
   id: string;
@@ -78,7 +86,23 @@ export async function handleComment(ownAccountId: string, c: CommentValue) {
 
   const tasks: Promise<void>[] = [];
 
-  if (automation.publicReplies.length) {
+  // Quiet mode: once over the public-reply cap, keep sending DMs but stop replying publicly.
+  const publicAllowed =
+    automation.publicReplies.length > 0 &&
+    (await hitHourly("public")) <= MAX_PUBLIC_REPLIES_PER_HOUR;
+
+  // Speed limit: new conversations beyond the hourly DM cap are skipped (and logged).
+  if ((await hitHourly("dm")) > MAX_DMS_PER_HOUR) {
+    await logEvent({
+      event: "rate_limited",
+      automationId: automation.id,
+      username,
+      text: `Over ${MAX_DMS_PER_HOUR} DMs this hour — skipped to protect the account`,
+    });
+    return;
+  }
+
+  if (publicAllowed) {
     tasks.push(
       replyToComment(c.id, fill(pick(automation.publicReplies), username)).then(() =>
         logEvent({ event: "public_reply", automationId: automation.id, username })

@@ -34,7 +34,7 @@ export default function Footer() {
             <span className="relative h-10 w-10 overflow-hidden rounded-full shrink-0">
               <Image 
                 alt="Puneet Tiwari" 
-                src="/profile.webp" 
+                src="/profile-photo.webp" 
                 fill 
                 sizes="40px"
                 className="object-cover" 

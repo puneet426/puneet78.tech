@@ -134,7 +134,7 @@ export default function SidebarLayout({
               <div className="flex items-center gap-3 pt-3 border-t border-neutral-100 dark:border-neutral-900/40 w-full">
                 <div className="relative h-9 w-9 rounded-full overflow-hidden border border-neutral-200 dark:border-neutral-800/80 bg-neutral-100 shadow-sm shrink-0">
                   <Image 
-                    src="/profile.webp" 
+                    src="/profile-photo.webp" 
                     alt="Puneet Tiwari" 
                     fill 
                     sizes="36px" 
@@ -199,7 +199,7 @@ export default function SidebarLayout({
             </div>
             <div className="flex items-center gap-3 border-t border-neutral-100 dark:border-neutral-900/80 pt-4">
               <div className="relative h-8 w-8 rounded-full overflow-hidden border border-neutral-200 dark:border-neutral-800/80 bg-neutral-100">
-                <Image src="/profile.webp" alt="Puneet Tiwari" fill sizes="32px" className="object-cover" />
+                <Image src="/profile-photo.webp" alt="Puneet Tiwari" fill sizes="32px" className="object-cover" />
               </div>
               <div className="text-left leading-tight">
                 <h4 className="text-xs font-black text-neutral-950 dark:text-white uppercase">Puneet Tiwari</h4>

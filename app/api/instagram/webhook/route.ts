@@ -22,12 +22,16 @@ type WebhookBody = {
 /** Webhook verification handshake (Meta calls this once when you subscribe). */
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams;
-  if (
-    p.get("hub.mode") === "subscribe" &&
-    p.get("hub.verify_token") === process.env.IG_VERIFY_TOKEN
-  ) {
+  const expected = (process.env.IG_VERIFY_TOKEN ?? "").trim();
+  const given = (p.get("hub.verify_token") ?? "").trim();
+  if (p.get("hub.mode") === "subscribe" && expected && given === expected) {
     return new NextResponse(p.get("hub.challenge") ?? "", { status: 200 });
   }
+  console.warn("[instagram] webhook verification failed", {
+    mode: p.get("hub.mode"),
+    tokenConfigured: Boolean(expected),
+    tokenLengths: [given.length, expected.length],
+  });
   return new NextResponse("Forbidden", { status: 403 });
 }
 

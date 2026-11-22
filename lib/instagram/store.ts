@@ -6,8 +6,21 @@ import type { Automation, LogEntry, LogEvent, Stats } from "./types";
  * marketplace integration provisions). Falls back to in-memory storage when not configured,
  * which is fine for local testing but NOT for production on Vercel.
  */
-const URL = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+/** Finds Upstash REST credentials whatever prefix the Vercel integration used (KV_, STORAGE_, ...). */
+function findRedisEnv(): { url?: string; token?: string } {
+  const env = process.env;
+  if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN)
+    return { url: env.UPSTASH_REDIS_REST_URL, token: env.UPSTASH_REDIS_REST_TOKEN };
+  if (env.KV_REST_API_URL && env.KV_REST_API_TOKEN)
+    return { url: env.KV_REST_API_URL, token: env.KV_REST_API_TOKEN };
+  for (const key of Object.keys(env)) {
+    if (!key.endsWith("_REST_API_URL")) continue;
+    const token = env[key.replace(/_URL$/, "_TOKEN")];
+    if (env[key] && token) return { url: env[key], token };
+  }
+  return {};
+}
+const { url: URL, token: TOKEN } = findRedisEnv();
 const P = "igauto:";
 
 type Mem = { kv: Map<string, { v: string; exp?: number }>; lists: Map<string, string[]> };

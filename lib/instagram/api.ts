@@ -14,7 +14,9 @@ import crypto from "crypto";
 const HOST = process.env.IG_GRAPH_BASE || `https://${process.env.IG_API_HOST || "graph.instagram.com"}`;
 const GRAPH = `${HOST}/${process.env.IG_GRAPH_VERSION || "v23.0"}`;
 const ACCOUNT = process.env.IG_ACCOUNT_ID || "me";
-const SENDER = process.env.IG_MESSAGING_ID || ACCOUNT;
+/** Who sends DMs: explicit override → account ID from the webhook → IG_ACCOUNT_ID → "me". */
+const senderId = (fromWebhook?: string) =>
+  process.env.IG_MESSAGING_ID || fromWebhook || (ACCOUNT !== "me" ? ACCOUNT : "me");
 
 function token(): string {
   const t = process.env.IG_ACCESS_TOKEN;
@@ -47,15 +49,20 @@ export function replyToComment(commentId: string, message: string) {
   return call(`/${commentId}/replies`, { body: { message } });
 }
 
-export function sendText(recipient: Recipient, text: string) {
-  return call<{ recipient_id?: string }>(`/${SENDER}/messages`, {
+export function sendText(recipient: Recipient, text: string, accountId?: string) {
+  return call<{ recipient_id?: string }>(`/${senderId(accountId)}/messages`, {
     body: { recipient, message: { text } },
   });
 }
 
 /** DM with up to 3 buttons (button template). Text max 640 chars, title max 20 chars. */
-export function sendButtons(recipient: Recipient, text: string, buttons: Button[]) {
-  return call<{ recipient_id?: string }>(`/${SENDER}/messages`, {
+export function sendButtons(
+  recipient: Recipient,
+  text: string,
+  buttons: Button[],
+  accountId?: string
+) {
+  return call<{ recipient_id?: string }>(`/${senderId(accountId)}/messages`, {
     body: {
       recipient,
       message: {

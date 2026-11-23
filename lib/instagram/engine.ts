@@ -1,4 +1,4 @@
-import { DEFAULT_STORY_DM, REELS_ONLY, TOP_LEVEL_ONLY } from "./config";
+import { DEFAULT_STORY_DM, TOP_LEVEL_ONLY } from "./config";
 import {
   getUsername,
   replyToComment,
@@ -67,8 +67,17 @@ export type MessagingEvent = {
 };
 
 const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
-const fill = (tpl: string, username?: string) =>
-  tpl.replaceAll("{username}", username || "there");
+type Kind = "reel" | "post" | "story";
+
+/**
+ * Fills {username} and {type} (reel / post / story). For post comments, the word "reel" in
+ * messages written for reels is switched to "post" so one automation reads right for both.
+ */
+const fill = (tpl: string, username?: string, kind: Kind = "reel") => {
+  let out = tpl.replaceAll("{username}", username || "there").replaceAll("{type}", kind);
+  if (kind === "post") out = out.replace(/\breel(s?)\b/g, "post$1").replace(/\bReel(s?)\b/g, "Post$1");
+  return out;
+};
 const btnTitle = (t: string) => t.slice(0, 20);
 
 function keywordsMatch(a: Automation, text?: string) {
@@ -77,8 +86,9 @@ function keywordsMatch(a: Automation, text?: string) {
   return a.keywords.some((k) => k.trim() && t.includes(k.trim().toLowerCase()));
 }
 
-function matchesComment(a: Automation, c: CommentValue) {
+function matchesComment(a: Automation, c: CommentValue, kind: Kind) {
   if (!a.enabled) return false;
+  if (kind === "post" && a.posts === false) return false;
   if (a.mediaIds.length && !a.mediaIds.includes(c.media?.id ?? "")) return false;
   return keywordsMatch(a, c.text);
 }
@@ -106,9 +116,10 @@ async function sendOpeningDm(
   recipient: { comment_id: string } | { id: string },
   username: string | undefined,
   ownAccountId: string,
-  template = automation.openingDm
+  template = automation.openingDm,
+  kind: Kind = "reel"
 ) {
-  const text = fill(template, username);
+  const text = fill(template, username, kind);
   let res: { recipient_id?: string };
   try {
     res = await sendButtons(
@@ -145,17 +156,20 @@ async function logErrors(results: PromiseSettledResult<unknown>[], automation: A
   }
 }
 
-// ---------------------------------------------------------------- reel comments
+// ---------------------------------------------------------------- reel and post comments
 
 export async function handleComment(ownAccountId: string, c: CommentValue) {
   const username = c.from?.username;
 
   if (!c.from || c.from.id === ownAccountId) return; // our own replies → avoid loops
   if (process.env.IG_USERNAME && username === process.env.IG_USERNAME) return;
-  if (REELS_ONLY && c.media?.media_product_type && c.media.media_product_type !== "REELS") return;
+  // Reels and normal posts (FEED). Ads and anything else are skipped.
+  const productType = c.media?.media_product_type;
+  if (productType && productType !== "REELS" && productType !== "FEED") return;
+  const kind: Kind = productType === "FEED" ? "post" : "reel";
   if (TOP_LEVEL_ONLY && c.parent_id) return;
 
-  const automation = (await getAutomations()).find((a) => matchesComment(a, c));
+  const automation = (await getAutomations()).find((a) => matchesComment(a, c, kind));
   if (!automation) return;
   if (!(await claimOnce(`comment:${c.id}`))) return;
 
@@ -171,14 +185,21 @@ export async function handleComment(ownAccountId: string, c: CommentValue) {
   const tasks: Promise<void>[] = [];
   if (publicAllowed) {
     tasks.push(
-      replyToComment(c.id, fill(pick(automation.publicReplies), username)).then(() =>
+      replyToComment(c.id, fill(pick(automation.publicReplies), username, kind)).then(() =>
         logEvent({ event: "public_reply", automationId: automation.id, username })
       )
     );
   }
   tasks.push(
     (async () => {
-      const igsid = await sendOpeningDm(automation, { comment_id: c.id }, username, ownAccountId);
+      const igsid = await sendOpeningDm(
+        automation,
+        { comment_id: c.id },
+        username,
+        ownAccountId,
+        automation.openingDm,
+        kind
+      );
       // Remember which automation this user is in, so a tap OR any reply continues the flow.
       await setPending(igsid ?? c.from!.id, { automationId: automation.id, username });
       await logEvent({ event: "opening_dm", automationId: automation.id, username });
@@ -215,7 +236,8 @@ async function handleStoryReply(ownAccountId: string, m: MessagingEvent) {
         { id: userId },
         username,
         ownAccountId,
-        automation.storyOpeningDm?.trim() || DEFAULT_STORY_DM
+        automation.storyOpeningDm?.trim() || DEFAULT_STORY_DM,
+        "story"
       );
       await setPending(userId, { automationId: automation.id, username });
       await logEvent({ event: "opening_dm", automationId: automation.id, username });

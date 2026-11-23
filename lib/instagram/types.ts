@@ -12,6 +12,8 @@ export type Automation = {
    * automations not tied to specific reels. Missing = true.
    */
   stories?: boolean;
+  /** Also run on comments on normal posts (photos/carousels), not just reels. Missing = true. */
+  posts?: boolean;
   /** First DM for story replies. Missing/empty = DEFAULT_STORY_DM. */
   storyOpeningDm?: string;
 

@@ -24,6 +24,7 @@ function sanitize(a: Partial<Automation>, i: number): Automation {
     keywords: list(a.keywords, 50),
     stories: a.stories !== false,
     posts: a.posts !== false,
+    askFirst: a.askFirst === true,
     storyOpeningDm: str(a.storyOpeningDm, 640),
     publicReplies: list(a.publicReplies, 300),
     openingDm: str(a.openingDm, 640),

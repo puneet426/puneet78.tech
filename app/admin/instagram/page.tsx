@@ -43,6 +43,7 @@ const blankAutomation = (): Automation => ({
   keywords: [],
   stories: true,
   posts: true,
+  askFirst: false,
   storyOpeningDm: "Hey {username}! 👋 Thanks for replying to my story. Tap below and I'll send it over 👇",
   publicReplies: ["Thanks @{username}! Check your DMs 📩"],
   openingDm: "Hey {username}! 👋 Tap below and I'll send it over 👇",
@@ -273,7 +274,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                   ·{" "}
                   {a.keywords.length ? `keywords: ${a.keywords.join(", ")}` : "any comment"}
                   {!a.mediaIds.length && a.stories !== false ? " · 📖 stories" : ""}
-                  {a.followGate ? " · 🔒 follow-gate" : ""}
+                  {a.askFirst ? " · 👆 tap first" : " · 🔗 link right away"}
+                  {a.askFirst && a.followGate ? " · 🔒 follow check" : ""}
                 </span>
                 <span className="ml-auto text-xs tabular-nums text-neutral-500">
                   {s.comment ?? 0} → {s.click ?? 0} → {s.delivered ?? 0} delivered
@@ -440,23 +442,6 @@ function Editor({
       </div>
 
       <div className="space-y-4">
-        <Field label="1 · Opening DM">
-          <textarea
-            className={input}
-            rows={3}
-            value={a.openingDm}
-            onChange={(e) => onChange({ openingDm: e.target.value })}
-          />
-        </Field>
-        <Field label="Button text" hint="Max 20 characters">
-          <input
-            className={input}
-            maxLength={20}
-            value={a.openingButton}
-            onChange={(e) => onChange({ openingButton: e.target.value })}
-          />
-        </Field>
-
         <label className="flex items-start gap-2 text-sm font-medium">
           <input
             type="checkbox"
@@ -467,8 +452,8 @@ function Editor({
           <span>
             🖼️ Also run on post comments (photos and carousels)
             <span className="block text-xs font-normal text-neutral-500">
-              Same reply, DM, follow check and link. The word &quot;reel&quot; in your messages becomes
-              &quot;post&quot; automatically, or use {"{type}"}.
+              Same flow as reels. The word &quot;reel&quot; in your messages becomes &quot;post&quot; automatically,
+              or use {"{type}"}.
             </span>
           </span>
         </label>
@@ -486,50 +471,87 @@ function Editor({
             <span className="block text-xs font-normal text-neutral-500">
               {a.mediaIds.length
                 ? "Not available when specific reels or posts are picked."
-                : "Anyone who replies to your story gets the same DM, follow check and link. No public reply."}
+                : "Anyone who replies to your story gets the same DM. No public reply."}
             </span>
           </span>
         </label>
 
-        {a.stories !== false && !a.mediaIds.length && (
-          <Field label="Story reply DM" hint="First DM for story replies (uses the same button). {username} = their handle.">
-            <textarea
-              className={input}
-              rows={3}
-              value={a.storyOpeningDm ?? ""}
-              placeholder="Hey {username}! 👋 Thanks for replying to my story. Tap below and I'll send it over 👇"
-              onChange={(e) => onChange({ storyOpeningDm: e.target.value })}
-            />
-          </Field>
-        )}
-
-        <label className="flex items-center gap-2 text-sm font-medium">
-          <input type="checkbox" checked={a.followGate} onChange={(e) => onChange({ followGate: e.target.checked })} />
-          🔒 Only deliver to followers (follow-gate)
+        <label className="flex items-start gap-2 rounded-lg border border-neutral-300 p-3 text-sm font-medium dark:border-neutral-700">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={a.askFirst === true}
+            onChange={(e) => onChange({ askFirst: e.target.checked })}
+          />
+          <span>
+            👆 Ask them to tap &quot;Send me the link&quot; first
+            <span className="block text-xs font-normal text-neutral-500">
+              {a.askFirst
+                ? "They get a DM with a button first; the link comes after they tap. Needed for the follow check."
+                : "Off: everyone gets the link message with the Open link button right away. Turn on to use the follow check."}
+            </span>
+          </span>
         </label>
 
-        {a.followGate && (
+        {a.askFirst && (
           <div className="space-y-4 border-l-2 border-[#9c93ff] pl-4">
-            <Field label="2 · If not following">
+            <Field label="First DM (comments)">
               <textarea
                 className={input}
                 rows={3}
-                value={a.notFollowingDm}
-                onChange={(e) => onChange({ notFollowingDm: e.target.value })}
+                value={a.openingDm}
+                onChange={(e) => onChange({ openingDm: e.target.value })}
               />
             </Field>
-            <Field label="'I followed' button text" hint="Max 20 characters. Tapping it sends the link directly, no second check.">
+            {a.stories !== false && !a.mediaIds.length && (
+              <Field label="First DM (story replies)" hint="{username} = their handle.">
+                <textarea
+                  className={input}
+                  rows={3}
+                  value={a.storyOpeningDm ?? ""}
+                  placeholder="Hey {username}! 👋 Thanks for replying to my story. Tap below and I'll send it over 👇"
+                  onChange={(e) => onChange({ storyOpeningDm: e.target.value })}
+                />
+              </Field>
+            )}
+            <Field label="Button text" hint="Max 20 characters">
               <input
                 className={input}
                 maxLength={20}
-                value={a.notFollowingButton}
-                onChange={(e) => onChange({ notFollowingButton: e.target.value })}
+                value={a.openingButton}
+                onChange={(e) => onChange({ openingButton: e.target.value })}
               />
             </Field>
+
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input type="checkbox" checked={a.followGate} onChange={(e) => onChange({ followGate: e.target.checked })} />
+              🔒 Only deliver to followers (follow check)
+            </label>
+
+            {a.followGate && (
+              <>
+                <Field label="If not following">
+                  <textarea
+                    className={input}
+                    rows={3}
+                    value={a.notFollowingDm}
+                    onChange={(e) => onChange({ notFollowingDm: e.target.value })}
+                  />
+                </Field>
+                <Field label="'I followed' button text" hint="Max 20 characters. Tapping it sends the link, no second check.">
+                  <input
+                    className={input}
+                    maxLength={20}
+                    value={a.notFollowingButton}
+                    onChange={(e) => onChange({ notFollowingButton: e.target.value })}
+                  />
+                </Field>
+              </>
+            )}
           </div>
         )}
 
-        <Field label={`${a.followGate ? "3" : "2"} · Delivery DM`}>
+        <Field label="Link message" hint="{username} = their handle.">
           <textarea
             className={input}
             rows={3}
@@ -537,17 +559,27 @@ function Editor({
             onChange={(e) => onChange({ deliveryDm: e.target.value })}
           />
         </Field>
-        <Field
-          label="Link"
-          hint="Sent as plain text under the delivery message, so it shows a preview card and works on phone, web and desktop."
-        >
-          <input
-            className={input}
-            value={a.deliveryLinkUrl}
-            placeholder="https://…"
-            onChange={(e) => onChange({ deliveryLinkUrl: e.target.value })}
-          />
-        </Field>
+        <div className="grid grid-cols-3 gap-2">
+          <Field label="Button text">
+            <input
+              className={input}
+              maxLength={20}
+              value={a.deliveryLinkTitle}
+              placeholder="Open link"
+              onChange={(e) => onChange({ deliveryLinkTitle: e.target.value })}
+            />
+          </Field>
+          <div className="col-span-2">
+            <Field label="Link URL">
+              <input
+                className={input}
+                value={a.deliveryLinkUrl}
+                placeholder="https://…"
+                onChange={(e) => onChange({ deliveryLinkUrl: e.target.value })}
+              />
+            </Field>
+          </div>
+        </div>
 
         <button className="text-sm text-red-500 hover:underline" onClick={onDelete}>
           Delete automation

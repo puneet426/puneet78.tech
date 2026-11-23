@@ -16,6 +16,7 @@ export const defaultAutomations: Automation[] = [
     keywords: [],
     stories: true,
     posts: true,
+    askFirst: false,
     storyOpeningDm:
       "Hey {username}! 👋 Thanks for replying to my story. Tap the button below and I'll send it over 👇",
     publicReplies: [

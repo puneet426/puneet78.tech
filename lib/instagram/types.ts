@@ -45,6 +45,7 @@ export type LogEvent =
   | "not_following"
   | "delivered"
   | "rate_limited"
+  | "skipped"
   | "error";
 
 export type LogEntry = {

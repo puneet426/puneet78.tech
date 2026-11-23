@@ -31,6 +31,7 @@ const EVENT_LABEL: Record<LogEvent, string> = {
   not_following: "🔒 Not following",
   delivered: "✅ Delivered",
   rate_limited: "⏸️ Hourly limit",
+  skipped: "⏭️ Skipped",
   error: "⚠️ Error",
 };
 

@@ -49,6 +49,19 @@ export async function POST(req: NextRequest) {
     return new NextResponse("Bad JSON", { status: 400 });
   }
 
+  // One line per incoming event, visible in the host's runtime logs.
+  for (const entry of body.entry ?? []) {
+    for (const ch of entry.changes ?? []) {
+      console.log(
+        `[instagram] in: ${ch.field} from @${ch.value?.from?.username ?? "?"} on ${ch.value?.media?.media_product_type ?? "?"}${ch.value?.parent_id ? " (thread reply)" : ""}`
+      );
+    }
+    for (const m of entry.messaging ?? []) {
+      const kind = m.postback ? "button tap" : m.message?.reply_to?.story ? "story reply" : m.message?.is_echo ? "own message" : "dm";
+      console.log(`[instagram] in: ${kind} from ${m.sender?.id}`);
+    }
+  }
+
   const jobs: Promise<void>[] = [];
   for (const entry of body.entry ?? []) {
     for (const change of entry.changes ?? []) {

@@ -156,6 +156,12 @@ async function logErrors(results: PromiseSettledResult<unknown>[], automation: A
   }
 }
 
+/** Records why an event was ignored, in the dashboard log and in the host's runtime logs. */
+async function skip(reason: string, username?: string, text?: string) {
+  console.log(`[instagram] skipped${username ? ` @${username}` : ""}: ${reason}`);
+  await logEvent({ event: "skipped", username, text: `${reason}${text ? ` — "${text.slice(0, 60)}"` : ""}` });
+}
+
 // ---------------------------------------------------------------- reel and post comments
 
 export async function handleComment(ownAccountId: string, c: CommentValue) {
@@ -165,13 +171,17 @@ export async function handleComment(ownAccountId: string, c: CommentValue) {
   if (process.env.IG_USERNAME && username === process.env.IG_USERNAME) return;
   // Reels and normal posts (FEED). Ads and anything else are skipped.
   const productType = c.media?.media_product_type;
-  if (productType && productType !== "REELS" && productType !== "FEED") return;
+  if (productType && productType !== "REELS" && productType !== "FEED") {
+    return skip(`comment on ${productType.toLowerCase()} (only reels and posts)`, username, c.text);
+  }
   const kind: Kind = productType === "FEED" ? "post" : "reel";
-  if (TOP_LEVEL_ONLY && c.parent_id) return;
+  if (TOP_LEVEL_ONLY && c.parent_id) return skip("reply inside a comment thread", username, c.text);
 
   const automation = (await getAutomations()).find((a) => matchesComment(a, c, kind));
-  if (!automation) return;
-  if (!(await claimOnce(`comment:${c.id}`))) return;
+  if (!automation) {
+    return skip(`no automation matches this ${kind} comment (check enabled, keywords, picked ${kind}s)`, username, c.text);
+  }
+  if (!(await claimOnce(`comment:${c.id}`))) return; // Meta re-sent the same event
 
   await logEvent({ event: "comment", automationId: automation.id, username, text: c.text });
 
@@ -217,11 +227,15 @@ async function handleStoryReply(ownAccountId: string, m: MessagingEvent) {
   const text = m.message?.text;
 
   const automation = (await getAutomations()).find((a) => matchesStory(a, text));
-  if (!automation) return;
+  if (!automation) {
+    return skip("no automation has story replies on (or keywords didn't match)", undefined, text);
+  }
 
   // Once per person per story, so a chatty reply thread doesn't restart the flow.
   const storyKey = story.id ?? story.url ?? "story";
-  if (!(await claimOnce(`story:${storyKey}:${userId}`, 2 * 24 * 3600))) return;
+  if (!(await claimOnce(`story:${storyKey}:${userId}`, 2 * 24 * 3600))) {
+    return skip("already got the flow for this story", await getUsername(userId), text);
+  }
 
   const username = await getUsername(userId);
   if (process.env.IG_USERNAME && username === process.env.IG_USERNAME) return;

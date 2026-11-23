@@ -537,26 +537,17 @@ function Editor({
             onChange={(e) => onChange({ deliveryDm: e.target.value })}
           />
         </Field>
-        <div className="grid grid-cols-3 gap-2">
-          <Field label="Link button">
-            <input
-              className={input}
-              maxLength={20}
-              value={a.deliveryLinkTitle}
-              onChange={(e) => onChange({ deliveryLinkTitle: e.target.value })}
-            />
-          </Field>
-          <div className="col-span-2">
-            <Field label="Link URL">
-              <input
-                className={input}
-                value={a.deliveryLinkUrl}
-                placeholder="https://…"
-                onChange={(e) => onChange({ deliveryLinkUrl: e.target.value })}
-              />
-            </Field>
-          </div>
-        </div>
+        <Field
+          label="Link"
+          hint="Sent as plain text under the delivery message, so it shows a preview card and works on phone, web and desktop."
+        >
+          <input
+            className={input}
+            value={a.deliveryLinkUrl}
+            placeholder="https://…"
+            onChange={(e) => onChange({ deliveryLinkUrl: e.target.value })}
+          />
+        </Field>
 
         <button className="text-sm text-red-500 hover:underline" onClick={onDelete}>
           Delete automation

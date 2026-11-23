@@ -80,6 +80,13 @@ const fill = (tpl: string, username?: string, kind: Kind = "reel") => {
 };
 const btnTitle = (t: string) => t.slice(0, 20);
 
+/**
+ * Instagram web/desktop doesn't show button messages, so every button DM also says what to
+ * type instead. Any typed reply continues the flow. Skipped if the text already mentions it.
+ */
+const withHint = (text: string, hint: string) =>
+  /reply\s+["“]?(yes|done)/i.test(text) ? text : `${text}\n\n${hint}`;
+
 function keywordsMatch(a: Automation, text?: string) {
   if (!a.keywords.length) return true;
   const t = (text ?? "").toLowerCase();
@@ -119,7 +126,7 @@ async function sendOpeningDm(
   template = automation.openingDm,
   kind: Kind = "reel"
 ) {
-  const text = fill(template, username, kind);
+  const text = withHint(fill(template, username, kind), `Don't see a button? Just reply "YES" 👇`);
   let res: { recipient_id?: string };
   try {
     res = await sendButtons(
@@ -137,7 +144,7 @@ async function sendOpeningDm(
   } catch (e) {
     // Fallback if buttons are rejected: plain text, the user replies to continue.
     console.warn("[instagram] button DM failed, falling back to text", e);
-    res = await sendText(recipient, `${text}\n\n(Reply "YES" to get it)`, ownAccountId);
+    res = await sendText(recipient, text, ownAccountId);
   }
   return res.recipient_id;
 }
@@ -303,7 +310,7 @@ export async function handleMessaging(ownAccountId: string, m: MessagingEvent) {
     if (automation.followGate && !saysFollowed && !(await userFollowsMe(userId))) {
       await sendButtons(
         { id: userId },
-        fill(automation.notFollowingDm, username),
+        withHint(fill(automation.notFollowingDm, username), `Don't see a button? Reply "DONE" after following 👇`),
         [
           {
             type: "postback",
@@ -318,23 +325,10 @@ export async function handleMessaging(ownAccountId: string, m: MessagingEvent) {
       return;
     }
 
+    // Plain text with the URL: shows on phone, web and desktop, with a link preview card.
     const text = fill(automation.deliveryDm, username);
-    if (automation.deliveryLinkUrl) {
-      await sendButtons(
-        { id: userId },
-        text,
-        [
-          {
-            type: "web_url",
-            title: btnTitle(automation.deliveryLinkTitle || "Open link"),
-            url: automation.deliveryLinkUrl,
-          },
-        ],
-        ownAccountId
-      );
-    } else {
-      await sendText({ id: userId }, text, ownAccountId);
-    }
+    const url = automation.deliveryLinkUrl?.trim();
+    await sendText({ id: userId }, url ? `${text}\n\n${url}` : text, ownAccountId);
     await clearPending(userId);
     await logEvent({ event: "delivered", automationId, username });
   } catch (e) {

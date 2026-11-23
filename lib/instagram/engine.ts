@@ -85,7 +85,7 @@ const btnTitle = (t: string) => t.slice(0, 20);
  * type instead. Any typed reply continues the flow. Skipped if the text already mentions it.
  */
 const withHint = (text: string, hint: string) =>
-  /reply\s+["“]?(yes|done)/i.test(text) ? text : `${text}\n\n${hint}`;
+  /reply\s+["“]?(yes|done|link)/i.test(text) ? text : `${text}\n\n${hint}`;
 
 function keywordsMatch(a: Automation, text?: string) {
   if (!a.keywords.length) return true;
@@ -149,6 +149,34 @@ async function sendOpeningDm(
   return res.recipient_id;
 }
 
+/**
+ * The link message with its "Open link" button. Instagram web doesn't show buttons, so the
+ * text says to reply "LINK"; a typed reply then gets the URL as plain text (see handleMessaging).
+ */
+async function sendLinkMessage(
+  automation: Automation,
+  recipient: { comment_id: string } | { id: string },
+  username: string | undefined,
+  ownAccountId: string,
+  kind: Kind = "reel"
+) {
+  const url = automation.deliveryLinkUrl?.trim();
+  const body = fill(automation.deliveryDm, username, kind);
+  if (!url) return sendText(recipient, body, ownAccountId);
+  const text = withHint(body, `Don't see the button? Reply "LINK" 👇`);
+  try {
+    return await sendButtons(
+      recipient,
+      text,
+      [{ type: "web_url", title: btnTitle(automation.deliveryLinkTitle || "Open link"), url }],
+      ownAccountId
+    );
+  } catch (e) {
+    console.warn("[instagram] link button failed, sending as text", e);
+    return sendText(recipient, `${body}\n\n${url}`, ownAccountId);
+  }
+}
+
 async function logErrors(results: PromiseSettledResult<unknown>[], automation: Automation, username?: string) {
   for (const r of results) {
     if (r.status === "rejected") {
@@ -207,6 +235,24 @@ export async function handleComment(ownAccountId: string, c: CommentValue) {
       )
     );
   }
+  if (!automation.askFirst) {
+    // Link straight away, as a private reply to the comment.
+    tasks.push(
+      (async () => {
+        const res = await sendLinkMessage(automation, { comment_id: c.id }, username, ownAccountId, kind);
+        await setPending(res?.recipient_id ?? c.from!.id, {
+          automationId: automation.id,
+          username,
+          stage: "link_sent",
+        });
+        await logEvent({ event: "opening_dm", automationId: automation.id, username });
+        await logEvent({ event: "delivered", automationId: automation.id, username });
+      })()
+    );
+    await logErrors(await Promise.allSettled(tasks), automation, username);
+    return;
+  }
+
   tasks.push(
     (async () => {
       const igsid = await sendOpeningDm(
@@ -250,6 +296,19 @@ async function handleStoryReply(ownAccountId: string, m: MessagingEvent) {
   await logEvent({ event: "story_reply", automationId: automation.id, username, text });
   if (await overDmLimit(automation, username)) return;
 
+  if (!automation.askFirst) {
+    const direct = await Promise.allSettled([
+      (async () => {
+        await sendLinkMessage(automation, { id: userId }, username, ownAccountId, "story");
+        await setPending(userId, { automationId: automation.id, username, stage: "link_sent" });
+        await logEvent({ event: "opening_dm", automationId: automation.id, username });
+        await logEvent({ event: "delivered", automationId: automation.id, username });
+      })(),
+    ]);
+    await logErrors(direct, automation, username);
+    return;
+  }
+
   const results = await Promise.allSettled([
     (async () => {
       await sendOpeningDm(
@@ -292,6 +351,19 @@ export async function handleMessaging(ownAccountId: string, m: MessagingEvent) {
     const rest = payload.slice(PAYLOAD_PREFIX.length);
     saysFollowed = rest.endsWith(FOLLOWED_SUFFIX);
     automationId = saysFollowed ? rest.slice(0, -FOLLOWED_SUFFIX.length) : rest;
+  } else if (pending?.stage === "link_sent") {
+    // They got the link button but typed instead (e.g. on Instagram web): send the URL as text once.
+    const sent = (await getAutomations()).find((a) => a.id === pending.automationId);
+    await clearPending(userId);
+    const url = sent?.deliveryLinkUrl?.trim();
+    if (!sent || !url) return;
+    try {
+      await sendText({ id: userId }, `Here's the link 👇\n${url}`, ownAccountId);
+      await logEvent({ event: "delivered", automationId: sent.id, username: pending.username, text: "sent as text" });
+    } catch (e) {
+      await logEvent({ event: "error", automationId: sent.id, username: pending.username, text: String(e).slice(0, 300) });
+    }
+    return;
   } else if (pending) {
     automationId = pending.automationId;
     // Typed reply after being asked to follow counts as "I followed".
@@ -325,11 +397,8 @@ export async function handleMessaging(ownAccountId: string, m: MessagingEvent) {
       return;
     }
 
-    // Plain text with the URL: shows on phone, web and desktop, with a link preview card.
-    const text = fill(automation.deliveryDm, username);
-    const url = automation.deliveryLinkUrl?.trim();
-    await sendText({ id: userId }, url ? `${text}\n\n${url}` : text, ownAccountId);
-    await clearPending(userId);
+    await sendLinkMessage(automation, { id: userId }, username, ownAccountId);
+    await setPending(userId, { automationId: automation.id, username, stage: "link_sent" });
     await logEvent({ event: "delivered", automationId, username });
   } catch (e) {
     console.error("[instagram] messaging", e);

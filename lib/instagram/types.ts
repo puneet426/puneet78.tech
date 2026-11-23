@@ -14,6 +14,11 @@ export type Automation = {
   stories?: boolean;
   /** Also run on comments on normal posts (photos/carousels), not just reels. Missing = true. */
   posts?: boolean;
+  /**
+   * Ask people to tap "Send me the link" before sending it. Needed for the follow check.
+   * Off/missing = the link message with its button is sent straight away.
+   */
+  askFirst?: boolean;
   /** First DM for story replies. Missing/empty = DEFAULT_STORY_DM. */
   storyOpeningDm?: string;
 

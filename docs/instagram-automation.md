@@ -18,6 +18,14 @@ Someone comments on your reel
 - Dashboard at **`https://puneet.occazi.in/admin/instagram`**: edit messages, pick reels, toggle the follow-gate, see the funnel (comments → DMs → taps → delivered) and a live activity log.
 - Uses Meta's **official** Instagram API (the same one ManyChat uses), so it's allowed and safe for your account.
 
+## Link right away vs. "Send me the link" first
+
+- Default: everyone gets the link message with an **Open link** button immediately.
+- Turn on **"Ask them to tap 'Send me the link' first"** in the dashboard to bring back the
+  button step. It is required for the follow check, which only works after the person taps.
+- Instagram web doesn't show buttons: the link message says to reply "LINK", and a typed reply
+  gets the URL as plain text once.
+
 ## Story replies and the follow check
 
 - A story reply arrives as a DM, so it skips the public reply and goes straight to the DM with

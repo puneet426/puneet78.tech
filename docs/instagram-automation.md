@@ -14,9 +14,18 @@ Someone comments on your reel
                      └──── tap → checks again ────┘
 ```
 
-- Works on **any comment** by default; add per-reel or keyword automations from the dashboard.
+- Works on **any comment** and on **replies to any of your stories** (current and future) by default; add per-reel or keyword automations from the dashboard.
 - Dashboard at **`https://puneet.occazi.in/admin/instagram`**: edit messages, pick reels, toggle the follow-gate, see the funnel (comments → DMs → taps → delivered) and a live activity log.
 - Uses Meta's **official** Instagram API (the same one ManyChat uses), so it's allowed and safe for your account.
+
+## Story replies and the follow check
+
+- A story reply arrives as a DM, so it skips the public reply and goes straight to the DM with
+  the button. Each person gets the flow once per story. Turn it off per automation in the
+  dashboard ("Also run on story replies"); it only applies to automations not tied to specific reels.
+- The follow check happens once, on the first "Send me the link" tap. If they don't follow yet,
+  they get "Follow first" with an "I followed ✅" button, and tapping that sends the link directly
+  (no second check, because Instagram can take a while to report a new follow).
 
 ## Files
 

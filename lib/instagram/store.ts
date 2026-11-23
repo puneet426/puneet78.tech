@@ -88,7 +88,7 @@ export function claimOnce(id: string, ttlSec = 7 * 24 * 3600) {
 }
 
 // ---------- pending conversations: user tapped/replied → which automation? ----------
-export type Pending = { automationId: string; username?: string };
+export type Pending = { automationId: string; username?: string; stage?: "asked_follow" };
 export function setPending(igsid: string, p: Pending) {
   return set(`pending:${igsid}`, JSON.stringify(p), 7 * 24 * 3600);
 }

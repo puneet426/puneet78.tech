@@ -84,6 +84,16 @@ export async function userFollowsMe(igsid: string): Promise<boolean> {
   return r.is_user_follow_business === true;
 }
 
+/** Best-effort username for a messaging user (story replies don't include it). */
+export async function getUsername(igsid: string): Promise<string | undefined> {
+  try {
+    const r = await call<{ username?: string }>(`/${igsid}?fields=username`, { method: "GET" });
+    return r.username;
+  } catch {
+    return undefined;
+  }
+}
+
 export type Media = {
   id: string;
   caption?: string;

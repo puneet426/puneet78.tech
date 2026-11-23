@@ -7,6 +7,14 @@ export type Automation = {
   /** Comment must contain one of these (case-insensitive). Empty = any comment. */
   keywords: string[];
 
+  /**
+   * Also run on replies to your stories (every current and future story). Only applies to
+   * automations not tied to specific reels. Missing = true.
+   */
+  stories?: boolean;
+  /** First DM for story replies. Missing/empty = DEFAULT_STORY_DM. */
+  storyOpeningDm?: string;
+
   /** Public reply under the comment. One variant is picked at random. Empty = no public reply. */
   publicReplies: string[];
 
@@ -28,6 +36,7 @@ export type Automation = {
 
 export type LogEvent =
   | "comment"
+  | "story_reply"
   | "public_reply"
   | "opening_dm"
   | "click"

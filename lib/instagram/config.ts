@@ -14,6 +14,9 @@ export const defaultAutomations: Automation[] = [
     enabled: true,
     mediaIds: [],
     keywords: [],
+    stories: true,
+    storyOpeningDm:
+      "Hey {username}! 👋 Thanks for replying to my story. Tap the button below and I'll send it over 👇",
     publicReplies: [
       "Thanks @{username}! Check your DMs 📩",
       "Appreciate it @{username} 🙌 Sent you a DM!",
@@ -31,6 +34,10 @@ export const defaultAutomations: Automation[] = [
     deliveryLinkUrl: "https://puneet.occazi.in",
   },
 ];
+
+/** Used for story replies when an automation has no story message of its own. */
+export const DEFAULT_STORY_DM =
+  "Hey {username}! 👋 Thanks for replying to my story. Tap the button below and I'll send it over 👇";
 
 /** Only reels trigger automations (set false to include feed posts). */
 export const REELS_ONLY = true;

@@ -22,6 +22,8 @@ function sanitize(a: Partial<Automation>, i: number): Automation {
     enabled: Boolean(a.enabled),
     mediaIds: list(a.mediaIds, 40),
     keywords: list(a.keywords, 50),
+    stories: a.stories !== false,
+    storyOpeningDm: str(a.storyOpeningDm, 640),
     publicReplies: list(a.publicReplies, 300),
     openingDm: str(a.openingDm, 640),
     openingButton: str(a.openingButton, 20) || "Send me the link",

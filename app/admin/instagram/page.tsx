@@ -15,7 +15,7 @@ type Media = {
 type Health = { persistentStore: boolean; accessToken: boolean; appSecret: boolean; verifyToken: boolean };
 
 const FUNNEL: { key: LogEvent; label: string }[] = [
-  { key: "comment", label: "Comments" },
+  { key: "comment", label: "Comments + story replies" },
   { key: "opening_dm", label: "DMs sent" },
   { key: "click", label: "Button taps" },
   { key: "not_following", label: "Asked to follow" },
@@ -24,6 +24,7 @@ const FUNNEL: { key: LogEvent; label: string }[] = [
 
 const EVENT_LABEL: Record<LogEvent, string> = {
   comment: "💬 Commented",
+  story_reply: "📖 Story reply",
   public_reply: "↩️ Public reply",
   opening_dm: "📩 DM sent",
   click: "👆 Tapped / replied",
@@ -39,6 +40,8 @@ const blankAutomation = (): Automation => ({
   enabled: true,
   mediaIds: [],
   keywords: [],
+  stories: true,
+  storyOpeningDm: "Hey {username}! 👋 Thanks for replying to my story. Tap below and I'll send it over 👇",
   publicReplies: ["Thanks @{username}! Check your DMs 📩"],
   openingDm: "Hey {username}! 👋 Tap below and I'll send it over 👇",
   openingButton: "Send me the link",
@@ -214,7 +217,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
         {FUNNEL.map((f) => (
           <div key={f.key} className={card}>
-            <div className="text-2xl font-semibold tabular-nums">{totals[f.key] ?? 0}</div>
+            <div className="text-2xl font-semibold tabular-nums">
+              {(totals[f.key] ?? 0) + (f.key === "comment" ? totals.story_reply ?? 0 : 0)}
+            </div>
             <div className="text-xs text-neutral-500">{f.label}</div>
           </div>
         ))}
@@ -260,6 +265,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                 <span className="text-xs text-neutral-500">
                   {a.mediaIds.length ? `${a.mediaIds.length} reel(s)` : "All reels"} ·{" "}
                   {a.keywords.length ? `keywords: ${a.keywords.join(", ")}` : "any comment"}
+                  {!a.mediaIds.length && a.stories !== false ? " · 📖 stories" : ""}
                   {a.followGate ? " · 🔒 follow-gate" : ""}
                 </span>
                 <span className="ml-auto text-xs tabular-nums text-neutral-500">
@@ -441,6 +447,36 @@ function Editor({
           />
         </Field>
 
+        <label className="flex items-start gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={a.stories !== false}
+            disabled={a.mediaIds.length > 0}
+            onChange={(e) => onChange({ stories: e.target.checked })}
+          />
+          <span>
+            📖 Also run on story replies (all current and future stories)
+            <span className="block text-xs font-normal text-neutral-500">
+              {a.mediaIds.length
+                ? "Not available when specific reels are picked."
+                : "Anyone who replies to your story gets the same DM, follow check and link. No public reply."}
+            </span>
+          </span>
+        </label>
+
+        {a.stories !== false && !a.mediaIds.length && (
+          <Field label="Story reply DM" hint="First DM for story replies (uses the same button). {username} = their handle.">
+            <textarea
+              className={input}
+              rows={3}
+              value={a.storyOpeningDm ?? ""}
+              placeholder="Hey {username}! 👋 Thanks for replying to my story. Tap below and I'll send it over 👇"
+              onChange={(e) => onChange({ storyOpeningDm: e.target.value })}
+            />
+          </Field>
+        )}
+
         <label className="flex items-center gap-2 text-sm font-medium">
           <input type="checkbox" checked={a.followGate} onChange={(e) => onChange({ followGate: e.target.checked })} />
           🔒 Only deliver to followers (follow-gate)
@@ -456,7 +492,7 @@ function Editor({
                 onChange={(e) => onChange({ notFollowingDm: e.target.value })}
               />
             </Field>
-            <Field label="Re-check button text" hint="Max 20 characters">
+            <Field label="'I followed' button text" hint="Max 20 characters. Tapping it sends the link directly, no second check.">
               <input
                 className={input}
                 maxLength={20}

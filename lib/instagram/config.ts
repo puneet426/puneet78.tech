@@ -15,6 +15,7 @@ export const defaultAutomations: Automation[] = [
     mediaIds: [],
     keywords: [],
     stories: true,
+    posts: true,
     storyOpeningDm:
       "Hey {username}! 👋 Thanks for replying to my story. Tap the button below and I'll send it over 👇",
     publicReplies: [
@@ -39,7 +40,5 @@ export const defaultAutomations: Automation[] = [
 export const DEFAULT_STORY_DM =
   "Hey {username}! 👋 Thanks for replying to my story. Tap the button below and I'll send it over 👇";
 
-/** Only reels trigger automations (set false to include feed posts). */
-export const REELS_ONLY = true;
 /** Ignore replies inside comment threads, respond to top-level comments only. */
 export const TOP_LEVEL_ONLY = true;

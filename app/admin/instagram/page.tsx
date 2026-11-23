@@ -41,6 +41,7 @@ const blankAutomation = (): Automation => ({
   mediaIds: [],
   keywords: [],
   stories: true,
+  posts: true,
   storyOpeningDm: "Hey {username}! 👋 Thanks for replying to my story. Tap below and I'll send it over 👇",
   publicReplies: ["Thanks @{username}! Check your DMs 📩"],
   openingDm: "Hey {username}! 👋 Tap below and I'll send it over 👇",
@@ -151,7 +152,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       .then((r) => r.json())
       .then((j) => {
         setMedia(j.media ?? []);
-        if (j.error) setMediaError("Couldn't load your reels — check IG_ACCESS_TOKEN.");
+        if (j.error) setMediaError("Couldn't load your reels and posts — check IG_ACCESS_TOKEN.");
       });
     loadActivity();
     const t = setInterval(loadActivity, 15000);
@@ -246,7 +247,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           </button>
         </div>
         <p className="text-xs text-neutral-500">
-          Checked top to bottom, first match wins. Keep the catch-all (no reels, no keywords) at the bottom.
+          Checked top to bottom, first match wins. Keep the catch-all (nothing picked, no keywords) at the bottom.
         </p>
 
         {automations.map((a, i) => {
@@ -263,7 +264,12 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                   <span className="font-medium">{a.name}</span>
                 </label>
                 <span className="text-xs text-neutral-500">
-                  {a.mediaIds.length ? `${a.mediaIds.length} reel(s)` : "All reels"} ·{" "}
+                  {a.mediaIds.length
+                    ? `${a.mediaIds.length} picked`
+                    : a.posts !== false
+                    ? "All reels + posts"
+                    : "All reels"}{" "}
+                  ·{" "}
                   {a.keywords.length ? `keywords: ${a.keywords.join(", ")}` : "any comment"}
                   {!a.mediaIds.length && a.stories !== false ? " · 📖 stories" : ""}
                   {a.followGate ? " · 🔒 follow-gate" : ""}
@@ -372,7 +378,7 @@ function Editor({
   const lines = (v: string) => v.split("\n");
   const toggleMedia = (id: string) =>
     onChange({ mediaIds: a.mediaIds.includes(id) ? a.mediaIds.filter((x) => x !== id) : [...a.mediaIds, id] });
-  const reels = media.filter((m) => m.media_product_type === "REELS");
+  const reels = media.filter((m) => m.media_product_type === "REELS" || m.media_product_type === "FEED");
 
   return (
     <div className="mt-5 grid gap-5 md:grid-cols-2">
@@ -390,7 +396,7 @@ function Editor({
           />
         </Field>
 
-        <Field label="Reels" hint="Pick none to apply to all reels.">
+        <Field label="Reels and posts" hint="Pick none to apply to all of them.">
           {mediaError && <p className="text-xs text-amber-600">{mediaError}</p>}
           <div className="grid max-h-56 grid-cols-4 gap-2 overflow-auto">
             {reels.map((m) => (
@@ -405,6 +411,9 @@ function Editor({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={m.thumbnail_url || m.media_url} alt="" className="h-full w-full object-cover" />
+                <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1 text-[10px] text-white">
+                  {m.media_product_type === "FEED" ? "Post" : "Reel"}
+                </span>
                 {a.mediaIds.includes(m.id) && (
                   <span className="absolute right-1 top-1 rounded bg-[#9c93ff] px-1 text-xs text-black">✓</span>
                 )}
@@ -451,6 +460,22 @@ function Editor({
           <input
             type="checkbox"
             className="mt-1"
+            checked={a.posts !== false}
+            onChange={(e) => onChange({ posts: e.target.checked })}
+          />
+          <span>
+            🖼️ Also run on post comments (photos and carousels)
+            <span className="block text-xs font-normal text-neutral-500">
+              Same reply, DM, follow check and link. The word &quot;reel&quot; in your messages becomes
+              &quot;post&quot; automatically, or use {"{type}"}.
+            </span>
+          </span>
+        </label>
+
+        <label className="flex items-start gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            className="mt-1"
             checked={a.stories !== false}
             disabled={a.mediaIds.length > 0}
             onChange={(e) => onChange({ stories: e.target.checked })}
@@ -459,7 +484,7 @@ function Editor({
             📖 Also run on story replies (all current and future stories)
             <span className="block text-xs font-normal text-neutral-500">
               {a.mediaIds.length
-                ? "Not available when specific reels are picked."
+                ? "Not available when specific reels or posts are picked."
                 : "Anyone who replies to your story gets the same DM, follow check and link. No public reply."}
             </span>
           </span>

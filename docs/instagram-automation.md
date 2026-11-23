@@ -14,7 +14,7 @@ Someone comments on your reel
                      └──── tap → checks again ────┘
 ```
 
-- Works on **any comment** and on **replies to any of your stories** (current and future) by default; add per-reel or keyword automations from the dashboard.
+- Works on **any comment on reels and posts** and on **replies to any of your stories** (current and future) by default; add per-reel or keyword automations from the dashboard.
 - Dashboard at **`https://puneet.occazi.in/admin/instagram`**: edit messages, pick reels, toggle the follow-gate, see the funnel (comments → DMs → taps → delivered) and a live activity log.
 - Uses Meta's **official** Instagram API (the same one ManyChat uses), so it's allowed and safe for your account.
 

@@ -23,6 +23,7 @@ function sanitize(a: Partial<Automation>, i: number): Automation {
     mediaIds: list(a.mediaIds, 40),
     keywords: list(a.keywords, 50),
     stories: a.stories !== false,
+    posts: a.posts !== false,
     storyOpeningDm: str(a.storyOpeningDm, 640),
     publicReplies: list(a.publicReplies, 300),
     openingDm: str(a.openingDm, 640),

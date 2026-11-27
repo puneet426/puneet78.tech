@@ -53,7 +53,7 @@ Other things worth knowing:
 - Education
 - Writing / blog list
 - Contact form
-- Mobile menu
+
 
 ## Command palette
 

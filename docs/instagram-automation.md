@@ -23,8 +23,10 @@ Someone comments on your reel
 - Default: everyone gets the link message with an **Open link** button immediately.
 - Turn on **"Ask them to tap 'Send me the link' first"** in the dashboard to bring back the
   button step. It is required for the follow check, which only works after the person taps.
-- Instagram web doesn't show buttons: the link message says to reply "LINK", and a typed reply
-  gets the URL as plain text once.
+- The link message is just your message plus the **Open link** button (no "reply LINK" hint).
+- If someone replies after getting the link, they get "For website DM 💻" with an
+  **Open link 7819017084** button that opens WhatsApp. Each person gets this only once, ever.
+  The number is `CONTACT_NUMBER` in `lib/instagram/engine.ts`.
 
 ## Story replies and the follow check
 

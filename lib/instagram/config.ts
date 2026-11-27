@@ -31,7 +31,8 @@ export const defaultAutomations: Automation[] = [
     notFollowingDm:
       "Almost there {username}! 🙏 This is for my followers only. Follow @codewith.pt and then tap the button below 👇",
     notFollowingButton: "I followed ✅",
-    deliveryDm: "Here you go {username} 🎉\n\nFollow for daily dev content 🔥",
+    deliveryDm:
+      'Here you go {username} 🎉\n\nAll the CS core topics asked in interviews, in one PDF 📚\n\n👇 Tap below to get yours.\n\nNeed a portfolio or website for your brand? Reply "WEBSITE" 💻',
     deliveryLinkTitle: "Open link",
     deliveryLinkUrl: "https://puneet.occazi.in",
   },

@@ -1,4 +1,4 @@
-# Dev Portfolio
+# Puneet's Portfolio
 
 A full-stack developer portfolio: dark, motion-driven, terminal-flavored.
 Built with Next.js 14 (App Router), TypeScript, Tailwind CSS, and Framer Motion.

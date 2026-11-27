@@ -33,6 +33,16 @@ import type { Automation } from "./types";
  */
 
 const PAYLOAD_PREFIX = "IGAUTO:";
+
+/**
+ * Sent when someone replies after getting the link. Goes to each person only once, ever.
+ * The button opens WhatsApp chat with this number.
+ */
+const CONTACT_NUMBER = "7819017084";
+const CONTACT_DM = `For website DM 💻\n\nTap below to message me directly 👇`;
+const CONTACT_BUTTON = `Open link ${CONTACT_NUMBER}`; // 20 chars, Instagram's button limit
+const CONTACT_URL = `https://wa.me/91${CONTACT_NUMBER}`;
+const CONTACT_ONCE_TTL = 10 * 365 * 24 * 3600;
 /** Added to the "I followed ✅" button: the person says they followed, so deliver directly. */
 const FOLLOWED_SUFFIX = ":followed";
 
@@ -150,8 +160,8 @@ async function sendOpeningDm(
 }
 
 /**
- * The link message with its "Open link" button. Instagram web doesn't show buttons, so the
- * text says to reply "LINK"; a typed reply then gets the URL as plain text (see handleMessaging).
+ * The link message with its "Open link" button. Only the automation's own message is sent,
+ * with no "reply LINK" hint. A typed reply afterwards gets the contact message (see handleMessaging).
  */
 async function sendLinkMessage(
   automation: Automation,
@@ -163,11 +173,10 @@ async function sendLinkMessage(
   const url = automation.deliveryLinkUrl?.trim();
   const body = fill(automation.deliveryDm, username, kind);
   if (!url) return sendText(recipient, body, ownAccountId);
-  const text = withHint(body, `Don't see the button? Reply "LINK" 👇`);
   try {
     return await sendButtons(
       recipient,
-      text,
+      body,
       [{ type: "web_url", title: btnTitle(automation.deliveryLinkTitle || "Open link"), url }],
       ownAccountId
     );
@@ -352,16 +361,25 @@ export async function handleMessaging(ownAccountId: string, m: MessagingEvent) {
     saysFollowed = rest.endsWith(FOLLOWED_SUFFIX);
     automationId = saysFollowed ? rest.slice(0, -FOLLOWED_SUFFIX.length) : rest;
   } else if (pending?.stage === "link_sent") {
-    // They got the link button but typed instead (e.g. on Instagram web): send the URL as text once.
-    const sent = (await getAutomations()).find((a) => a.id === pending.automationId);
+    // They replied after getting the link: send the contact message with the number button,
+    // once per person. Later replies are left for you to answer yourself.
     await clearPending(userId);
-    const url = sent?.deliveryLinkUrl?.trim();
-    if (!sent || !url) return;
+    if (!(await claimOnce(`contact:${userId}`, CONTACT_ONCE_TTL))) return;
     try {
-      await sendText({ id: userId }, `Here's the link 👇\n${url}`, ownAccountId);
-      await logEvent({ event: "delivered", automationId: sent.id, username: pending.username, text: "sent as text" });
+      try {
+        await sendButtons(
+          { id: userId },
+          CONTACT_DM,
+          [{ type: "web_url", title: btnTitle(CONTACT_BUTTON), url: CONTACT_URL }],
+          ownAccountId
+        );
+      } catch (e) {
+        console.warn("[instagram] contact button failed, sending as text", e);
+        await sendText({ id: userId }, `For website DM 💻 ${CONTACT_NUMBER}\n${CONTACT_URL}`, ownAccountId);
+      }
+      await logEvent({ event: "delivered", automationId: pending.automationId, username: pending.username, text: "contact sent" });
     } catch (e) {
-      await logEvent({ event: "error", automationId: sent.id, username: pending.username, text: String(e).slice(0, 300) });
+      await logEvent({ event: "error", automationId: pending.automationId, username: pending.username, text: String(e).slice(0, 300) });
     }
     return;
   } else if (pending) {
